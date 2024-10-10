@@ -39,7 +39,7 @@ def split_filemp3(original_file, ad_list, podcast_name):
             start_clip = tc*1000 #pydub works with milliseconds, so seconds are converted here
             end_clip = (tc+5)*1000
             new_audio[start_clip:end_clip].export(
-                f'{podcast_name}_{is_ad}_{tc}.wav',
+                f'{is_ad}_{tc}_{duration}_{podcast_name}.wav',
                 format='wav')
     is_ad = '0'
     return 'finished'
@@ -80,7 +80,7 @@ def split_filewav(original_file, ad_list, podcast_name):
             start_clip = tc*1000 #pydub works with milliseconds, so seconds are converted here
             end_clip = (tc+5)*1000
             new_audio[start_clip:end_clip].export(
-                f'{podcast_name}_{is_ad}_{tc}.wav',
+                f'{is_ad}_{tc}_{duration}_{podcast_name}.wav',
                 format='wav')
     is_ad = '0'
     return 'finished'
