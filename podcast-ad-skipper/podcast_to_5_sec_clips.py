@@ -91,10 +91,9 @@ output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips
 
 podcast_files_mp3_wav = [
     # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-    # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
-    # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
-    # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-    # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
+    # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwords"),
+    # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuart"),
+    # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricane"),
     #("podcast1.wav", [0,0], "podcastep1")
 ]
 
