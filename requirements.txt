@@ -1,2 +1,10 @@
 librosa
 pydub
+
+# Some example packages
+pandas
+numpy
+seaborn
+
+# Testing packages
+pytest
