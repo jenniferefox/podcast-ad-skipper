@@ -8,4 +8,4 @@ NOTE: To be able to use the "splip_files" function we will need to create to fol
 
 Update the XXX with you user name!!
 5_sec_clips: it will stores the 5 sec clip
-full_podcast: Save the full podcasts in this folder. 
+full_podcast: Save the full podcasts in this folder.
