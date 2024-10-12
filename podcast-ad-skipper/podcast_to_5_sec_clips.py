@@ -1,6 +1,7 @@
 # Import Libraries:
 import os
 from pydub import AudioSegment
+from upload_to_gcloud import upload_files_to_gcloud
 
 def split_files(original_file, ad_list, podcast_name, output_directory):
 
@@ -75,6 +76,8 @@ def split_files(original_file, ad_list, podcast_name, output_directory):
             # Making a clip files:
             new_audio[start_clip:end_clip].export(output_file, format='wav')
 
+            upload_files_to_gcloud('{BUCKET_NAME}', '{is_ad}_{tc}_{duration}_{podcast_name}.wav', source_directory="")
+
     is_ad = '0'
     return 'finished'
 
@@ -101,6 +104,7 @@ podcast_files_mp3_wav = [
 # Loop through each file and process mp3:
 for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
     result = split_files(file_name, ad_list, podcast_name, output_directory)
+
     print(f'Processing {podcast_name}: {result}')
 
 # You can use : "make split_clip" to run this code"
