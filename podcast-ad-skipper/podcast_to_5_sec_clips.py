@@ -74,16 +74,17 @@ def split_files(original_file, ad_list, podcast_name, output_directory):
             print(f"Saving clip: {output_file}")
 
             # Making a clip files:
-            new_audio[start_clip:end_clip].export(output_file, format='wav')
+            new_clip = new_audio[start_clip:end_clip].export(format='wav')
 
-            upload_files_to_gcloud('{BUCKET_NAME}', '{is_ad}_{tc}_{duration}_{podcast_name}.wav', source_directory="")
+            upload_files_to_gcloud(os.getenv('BUCKET_NAME'), new_clip, '{is_ad}_{tc}_{duration}_{podcast_name}.wav')
+
 
     is_ad = '0'
     return 'finished'
 
 
 #Running the function with podcasts and creating a separate folder for each podcast
-base_directory = 'raw_data/full_podcast' # Add the full audio file here
+base_directory = 'raw_data' # Add the full audio file here
 output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
 # # Directory where you want to save all podcasts (This need to change for every person)
 
@@ -93,11 +94,13 @@ output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips
 # 3: Output name: name podcast and episode
 
 podcast_files_mp3_wav = [
+    (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181")
     # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-    # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwords"),
-    # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuart"),
-    # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricane"),
-    #("podcast1.wav", [0,0], "podcastep1")
+    # # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
+    # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
+    # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
+    # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
+            #("podcast1.wav", [0,0], "podcastep1")
 ]
 
 # Loop through each file and process mp3:
