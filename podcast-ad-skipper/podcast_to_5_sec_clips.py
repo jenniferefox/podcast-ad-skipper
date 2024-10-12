@@ -1,7 +1,7 @@
 # Import Libraries:
 import os
 from pydub import AudioSegment
-from .upload_to_gcloud import upload_files_to_gcloud
+from upload_to_gcloud import upload_files_to_gcloud
 
 def split_files(original_file, ad_list, podcast_name, output_directory):
 

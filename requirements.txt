@@ -8,3 +8,4 @@ seaborn
 
 # Testing packages
 pytest
+google-cloud-storage
