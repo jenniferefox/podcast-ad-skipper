@@ -4,33 +4,28 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BUCKET_NAME  = os.environ.get("BUCKET_NAME")
-
-
-
-
-
+BUCKET_NAME  = os.environ.get('BUCKET_NAME')
 
 
 def download_all_files(BUCKET_NAME, destination_folder):
-    """
-    Download all files from a Google Cloud Storage bucket to a local folder.
 
-    :param bucket_name: Name of the GCS bucket
-    :param destination_folder: Local folder where the files will be saved
-    """
     # Initialize the GCS client
-    storage_client = storage.Client()
+    # storage_client = storage.Client()
 
     # Get the bucket
-    bucket = storage_client.get_bucket(bucket_name)
-
-    # List all files in the bucket
-    blobs = bucket.list_blobs()
+    # bucket = storage_client.get_bucket(BUCKET_NAME)
 
     # Ensure the destination folder exists
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
+    # if not {podcast}_OUTPUT_BUCKET_NAME:
+    #     os.makedirs({podcast}_OUTPUT_BUCKET_NAME)
+
+
+
+
+
+
+
+
 
 
 
