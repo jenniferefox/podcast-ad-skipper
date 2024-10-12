@@ -2,4 +2,5 @@
 .envrc
 
 raw_data/
+gcp/
 .DS_Store
