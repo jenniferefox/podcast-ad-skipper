@@ -1,8 +1,22 @@
-from google.cloud.storage import Client, transfer_manager
+import json
+import os
 
-def upload_files_to_gcloud(
-    bucket_name, filenames, source_directory="", workers=8
-):
+from google.cloud import storage
+from google.oauth2 import service_account
+
+
+def auth_gc():
+    # wip
+    with open('gcp/podcast-ad-skipper-0dd8dd2c5ac1.json') as source:
+        info = json.load(source)
+
+    storage_credentials = service_account.Credentials.from_service_account_info(info)
+
+    storage_client = storage.Client(project=os.environ.get('GCP_PROJECT_ID'), credentials=storage_credentials)
+
+    return storage_client
+
+def upload_files_to_gcloud(bucket_name, filenames, blobname):
     """Upload every file in a list to a bucket, concurrently in a process pool.
 
     Each blob name is derived from the filename, not including the
@@ -28,19 +42,26 @@ def upload_files_to_gcloud(
     # some CPU and memory resources until finished. Threads can be used instead
     # of processes by passing `worker_type=transfer_manager.THREAD`.
     # workers=8
+    with open('gcp/podcast-ad-skipper-0dd8dd2c5ac1.json') as source:
+        info = json.load(source)
 
-    storage_client = Client()
+    storage_credentials = service_account.Credentials.from_service_account_info(info)
+
+    storage_client = storage.Client(project=os.environ.get('GCP_PROJECT_ID'), credentials=storage_credentials)
+
     bucket = storage_client.bucket(bucket_name)
 
-    results = transfer_manager.upload_many_from_filenames(
-        bucket, filenames, source_directory=source_directory, max_workers=workers
-    )
+    d = bucket.blob(blobname)
+    d.upload_from_file(filenames, content_type="audio/wav")
 
-    for name, result in zip(filenames, results):
-        # The results list is either `None` or an exception for each filename in
-        # the input list, in order.
+    # for name, result in zip(filenames, results):
+    # The results list is either `None` or an exception for each filename in
+    # the input list, in order.
 
-        if isinstance(result, Exception):
-            print("Failed to upload {} due to exception: {}".format(name, result))
-        else:
-            print("Uploaded {} to {}.".format(name, bucket.name))
+    # if isinstance(result, Exception):
+    #     print("Failed to upload {} due to exception: {}".format(name, result))
+    # else:
+    #     print("Uploaded {} to {}.".format(name, bucket.name))
+
+# if __name__ == '__main__':
+#     auth_gc()

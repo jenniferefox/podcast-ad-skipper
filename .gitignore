@@ -4,3 +4,8 @@
 raw_data/
 gcp/
 .DS_Store
+*.egg-info
+
+# Jupiter Notebook #
+.pytest_cache
+*checkpoint.ipynb
