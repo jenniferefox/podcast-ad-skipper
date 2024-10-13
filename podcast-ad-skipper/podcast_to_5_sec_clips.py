@@ -2,10 +2,10 @@
 import os
 
 from pydub import AudioSegment
-from upload_to_gcloud import upload_files_to_gcloud
+from upload_to_gcloud import upload_clips_gcs, auth_gc
 
 
-def split_files(original_file, ad_list, podcast_name, output_directory, run_env="gc"):
+def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
 
     """
     This function takes 3 inputs to convert mp3 or wav files:
@@ -83,37 +83,39 @@ def split_files(original_file, ad_list, podcast_name, output_directory, run_env=
             elif run_env == "gc":
                  # Making a clip files:
                 new_clip = new_audio[start_clip:end_clip].export(format='wav')
-                upload_files_to_gcloud(os.getenv('BUCKET_NAME'), new_clip, f'{podcast_name}/{is_ad}_{tc}_{duration}_{podcast_name}.wav')
+                upload_clips_gcs(google_client, os.getenv('BUCKET_NAME'), new_clip, f'{podcast_name}/{is_ad}_{tc}_{duration}_{podcast_name}.wav')
                 print(f"Saved clip in Google Cloud Storage: {is_ad}_{tc}_{duration}_{podcast_name}.wav")
 
     is_ad = '0'
     return 'finished'
 
+if __name__ == '__main__':
+    #Running the function with podcasts and creating a separate folder for each podcast
+    base_directory = 'raw_data/full_podcast' # Add the full audio file here
+    output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
+    # # Directory where you want to save all podcasts (This need to change for every person)
 
-#Running the function with podcasts and creating a separate folder for each podcast
-base_directory = 'raw_data/full_podcast' # Add the full audio file here
-output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
-# # Directory where you want to save all podcasts (This need to change for every person)
+    # List of audio files with their ad times and podcast names for mp3/wav files:
+    # 1: Audio name file with the extation
+    # 2: Period in seconds where the ad starts and ends
+    # 3: Output name: name podcast and episode
 
-# List of audio files with their ad times and podcast names for mp3/wav files:
-# 1: Audio name file with the extation
-# 2: Period in seconds where the ad starts and ends
-# 3: Output name: name podcast and episode
+    podcast_files_mp3_wav = [
+        # (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181")
+        # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
+        (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
+        # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
+        # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
+        # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
+                #("podcast1.wav", [0,0], "podcastep1")
+    ]
+    # authentication with google cloud
 
-podcast_files_mp3_wav = [
-    # (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181")
-    # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-    # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
-    # (os.path.join(base_directory,"The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
-    # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-    # (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
-            #("podcast1.wav", [0,0], "podcastep1")
-]
+    google_client = auth_gc()
+    # Loop through each file and process mp3:
+    for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
+        result = split_files(file_name, ad_list, podcast_name, output_directory, google_client)
 
-# Loop through each file and process mp3:
-for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
-    result = split_files(file_name, ad_list, podcast_name, output_directory)
+        print(f'Processing {podcast_name}: {result}')
 
-    print(f'Processing {podcast_name}: {result}')
-
-# You can use : "make split_clip" to run this code"
+    # You can use : "make split_clip" to run this code"
