@@ -1,5 +1,6 @@
 librosa
 pydub
+termcolor
 
 # Some example packages
 pandas

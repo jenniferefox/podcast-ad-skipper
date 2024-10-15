@@ -7,6 +7,8 @@ pylint:
 pytest:
 	PYTHONDONTWRITEBYTECODE=1 pytest -v --color=yes
 
-
 split_clip:
-	python podcast-ad-skipper/podcast_to_5_sec_clips.py
+	@python podcast-ad-skipper/podcast_to_5_sec_clips.py
+
+install:
+	pip install -e .
