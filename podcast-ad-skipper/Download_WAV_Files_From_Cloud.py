@@ -70,6 +70,10 @@ def process_audio_file(BUCKET_NAME, blob_name):
 
 
 
+
+
+#### AS DISCUSSED, THE CODE BELOW IS JUST FOR REFERENCE, NOT FINAL
+
 def call_bq_client():
     """Authenticates and returns a Google Cloud BigQuery client using service account credentials"""
     try:
