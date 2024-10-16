@@ -9,4 +9,8 @@ seaborn
 
 # Testing packages
 pytest
+
+# gcp
 google-cloud-storage
+google-auth
+google-cloud-bigquery
