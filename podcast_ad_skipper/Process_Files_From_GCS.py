@@ -5,7 +5,7 @@ import json
 import sys
 from Spectrogram_Conversion import create_spectrogram, spectrogram_to_numpy
 import pandas as pd
-from upload_to_gcloud import auth_gc
+from upload_to_gcloud import auth_gc_storage
 
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import storage
@@ -18,7 +18,7 @@ GCP_PROJECT_ID= os.environ.get('GCP_PROJECT_ID')
 BQ_DATASET= os.environ.get('BQ_DATASET')
 BQ_TABLE= os.environ.get('BQ_TABLE')
 
-storage_client = auth_gc()
+storage_client = auth_gc_storage()
 
 
 def process_audio_file(BUCKET_NAME, blob_name):

@@ -96,4 +96,4 @@ def upload_clips_gcs(client, bucket_name, filenames, blobname):
     #     print("Uploaded {} to {}.".format(name, bucket.name))
 
 # if __name__ == '__main__':
-#     auth_gc()
+#     auth_gc_storage
