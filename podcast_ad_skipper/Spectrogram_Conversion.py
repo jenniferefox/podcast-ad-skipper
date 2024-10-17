@@ -27,19 +27,6 @@ def create_spectrogram(audio_file):
 def spectrogram_to_numpy(spectrogram_db):
     return np.array(spectrogram_db)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # FOR LOCAL USE ONLY ----- DO NOT USE ----- JUST FOR INSPO
 def process_directory(input_dir, output_dir):
 
@@ -64,9 +51,3 @@ def process_directory(input_dir, output_dir):
     print(f"Total files processed: {file_count}")
     print(f"Total processing time: {total_processing_time:.2f} seconds")
     print(f"Average processing time per file: {total_processing_time / file_count:.2f} seconds")
-
-
-# Example usage
-input_directory = "/Users/irenegracia/code/jenniferefox/podcast-ad-skipper/raw_data"
-output_directory = "/Users/irenegracia/code/jenniferefox/podcast-ad-skipper/raw_data"
-process_directory(input_directory, output_directory)
