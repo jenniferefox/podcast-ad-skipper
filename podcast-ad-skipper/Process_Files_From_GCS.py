@@ -26,16 +26,17 @@ def process_audio_file(BUCKET_NAME, blob_name):
     blob = bucket.blob(blob_name)
 
     with blob.open('rb') as blob_file:
-        file_data = blob.file.read()
+        file_data = blob_file.read()
 
     spectrogram_db = create_spectrogram(file_data)
-    spectrogram_to_numpy(file_data)
+    spectrogram_to_numpy(spectrogram_db)
 
 
+#folders not buckets
 
-def process_all_audio_files_in_bucket(BUCKET_NAME):
+def process_all_audio_files_in_bucket(BUCKET_NAME, folder_name):
     bucket = storage_client.bucket(BUCKET_NAME)
-    blob_list = bucket.list_blobs()
+    blob_list = bucket.list_blobs(prefix=folder_name)
     for blob in blob_list:
         process_audio_file(BUCKET_NAME, blob)
 
