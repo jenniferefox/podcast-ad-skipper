@@ -2,39 +2,58 @@ import json
 import os
 import sys
 from termcolor import colored
+import requests
+from pathlib import Path
 
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import storage
 from google.oauth2 import service_account
 
 
-def auth_gc():
+def auth_gc_storage():
     """Authenticates and returns a Google Cloud Storage client using service account credentials"""
+
+    # Check if running in a Google Cloud environment (e.g., a VM or Cloud Function)
     try:
-        with open('gcp/podcast-ad-skipper-0dd8dd2c5ac1.json') as source:
-            info = json.load(source)
+        # The metadata server is only available on Google Cloud environments
+        response = requests.get('http://metadata.google.internal', timeout=1)
+        if response.status_code == 200:
+            # Running in Google Cloud, no need to specify credentials
+            print("Running in Google Cloud environment.")
+            print("Authenticated successfully! ✅")
+            return storage.Client()
 
-        storage_credentials = service_account.Credentials.from_service_account_info(info)
+    except (requests.exceptions.RequestException, ValueError):
+        # Running locally, load credentials from a file
+        print("Running in local environment.")
+        try:
+            current_dir = Path(__file__).parent
 
-        storage_client = storage.Client(project=os.environ.get('GCP_PROJECT_ID'), credentials=storage_credentials)
+            # Define the path to the service account folder (relative to the main project root)
+            service_account_path = current_dir.parent / os.environ.get('GOOGLE_CLOUD_SERVICE_ACCOUNT')
 
-        print("Authenticated successfully! ✅")
-        return storage_client
+            # Load and return the service account credentials
+            credentials = service_account.Credentials.from_service_account_file(service_account_path)
 
-    except FileNotFoundError:
-        print("Error: The specified credentials file 'gcp/file_name.json' was not found.")
-        print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
-        sys.exit(1)
+            storage_client = storage.Client(project=os.environ.get('GCP_PROJECT_ID'), credentials=credentials)
 
-    except GoogleAuthError as e:
-        print(f"Error: Authentication failed with Google Cloud: {e}")
-        print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
-        sys.exit(1)
+            print("Authenticated successfully! ✅")
+            return storage_client
 
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
-        sys.exit(1)
+        except FileNotFoundError:
+            print("Error: The specified credentials file 'gcp/file_name.json' was not found.")
+            print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
+            sys.exit(1)
+
+        except GoogleAuthError as e:
+            print(f"Error: Authentication failed with Google Cloud: {e}")
+            print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
+            sys.exit(1)
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
+            sys.exit(1)
 
 def upload_clips_gcs(client, bucket_name, filenames, blobname):
     """Upload every file in a list to a bucket, concurrently in a process pool.
