@@ -32,7 +32,9 @@ def process_audio_file(BUCKET_NAME, blob_name):
     spectrogram_to_numpy(spectrogram_db)
 
 
-#folders not buckets
+# Use a dash for the folder names e.g. audio_files/
+# The / helps explicitly indicate that you're targeting files inside a folder
+# rather than a blob whose name starts with the same string but exists at the root level.
 
 def process_all_audio_files_in_bucket(BUCKET_NAME, folder_name):
     bucket = storage_client.bucket(BUCKET_NAME)
