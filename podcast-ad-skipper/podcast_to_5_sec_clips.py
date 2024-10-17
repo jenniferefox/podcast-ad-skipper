@@ -101,32 +101,29 @@ if __name__ == '__main__':
     # 3: Output name: name podcast and episode
 
     podcast_files_mp3_wav = [
-        (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181"),
-        (os.path.join(base_directory, "OffMenu263.mp3"), [0,(60*2)+43,(3*60)+58, (4*60)+19, (33*60)+31, (35*60)+31,(54*60)+50, (56*60)+19,(77*60)+55, (78*60)+52, (79*60)+29, (80*60)+47], "offmenu263"),
-        (os.path.join(base_directory, "ParentingHell908.mp3"), [37, (60+15), (55*60)+36, (57*60)+4], "parentingHell908"),
-        (os.path.join(base_directory, "NSTAAF_Radioactivejenga.mp3"), [60+34,(60*2)+5,(60*17)+42,(20*60)+55,(48*60)+35,(50*60)+5,(58*60)+4,(59*60)+27], "nstaaf1"),
-        (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-        (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
-        (os.path.join(base_directory, "The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
-        (os.path.join(base_directory, "Rabbit CEO Jesse Lyu is not thinking too far ahead.mp3.mp3"), [0, (2*60), (24*60+12), (26*60+50), (60*60+51), ((60*60)+(4*60+30)), ((60*60)+(23*60+3)), ((60*60)+(24*60+44))  ], "rabbitceojesselyuisnotthinkingtoofaradead"),
-        (os.path.join(base_directory, "Surviving a Hurricane,mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
-        (os.path.join(base_directory, "Rupi Kaur Opens Up -I Felt Invisible- How To Transcend Trauma & Find Your Self-Worth.mp3"), [(60+21), (2*60+59), (22*60+20), (24*60), (43*60+50), (45*60), ((60*60)+(4*60+20)), ((60*60)+(5*60+30)), ((60*60)+(20*60+50)), ((60*60)+(22*60))], "rupikauropensupifetinvisible"),
-        (os.path.join(base_directory, "Quinta Brunson.mp3"), [0, 45, ((60*60)+(6*60+35)), ((60*60)+(7*60+45))], "quintabrunson"),
-        (os.path.join(base_directory, "Israel at War One Year On.mp3"), [0, (2*60+40), (58*60+18), (59*60+49)], "israelatwaroneyearon"),
-        (os.path.join(base_directory, "Guenther Steiner life on the other side of F1.mp3"), [(9*60+50), (11*60), (19*60), (20*60+30), (32*60), (33*60+15)], "guenthersteinerlifeontheothersideoff1"),
-        (os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
-        (os.path.join(base_directory, "Election Special.mp3"), [0, 60,  (20*60+20), (21*60+50), (26*60+50), (28*60+20), (42*60+30), (48*60)], "electionspecial"),
-        (os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
-        (os.path.join(base_directory, "Dreaming of Polar Night in Svalbard.mp3"), [0, 60+40], "dreamingofpolarnightinsvalbard"),
-        (os.path.join(base_directory, "Donald Trump Joins The Show!.mp3"), [(4*60+25), (5*60+30), (12*60+5), (13*60+5), (26*60+45), (27*60+55)], "donaldtrumpjoinstheshow"),
-        (os.path.join(base_directory, "Different Days.mp3"), [0, 60,  (40*60+20), (40*60+50), ((60*60)+(23*60+45)), ((60*60)+(24*60+18))], "differentdays"),
-        (os.path.join(base_directory, "Changes in the Big Apple.mp3"), [0, 30,  (15*60+50), (17*60+15), (22*60+30), (22*60+50), (35*60+10), (32*60+45)], "changesinthebigapple"),
-        (os.path.join(base_directory, "Bitcoin Mining Decentralization with the Datum Protocol at Ocean Mining.mp3"), [0, (60+25), (14*60+20), (18*60), (30*60+50), (33*60+45), (59*60+30), (60*60+2)], "bitcoinminingdecentralizationwiththedatumprotocolatoceanmining"),
+        # (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181"),
+        # (os.path.join(base_directory, "OffMenu263.mp3"), [0,(60*2)+43,(3*60)+58, (4*60)+19, (33*60)+31, (35*60)+31,(54*60)+50, (56*60)+19,(77*60)+55, (78*60)+52, (79*60)+29, (80*60)+47], "offmenu263"),
+        # (os.path.join(base_directory, "ParentingHell908.mp3"), [37, (60+15), (55*60)+36, (57*60)+4], "parentingHell908"),
+        # (os.path.join(base_directory, "NSTAAF_Radioactivejenga.mp3"), [60+34,(60*2)+5,(60*17)+42,(20*60)+55,(48*60)+35,(50*60)+5,(58*60)+4,(59*60)+27], "nstaaf1"),
+        # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
+        # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
+        # (os.path.join(base_directory, "The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
+        # (os.path.join(base_directory, "Rabbit CEO Jesse Lyu is not thinking too far ahead.mp3"), [0, (2*60), (24*60+12), (26*60+50), (60*60+51), ((60*60)+(4*60+30)), ((60*60)+(23*60+3)), ((60*60)+(24*60+44))  ], "rabbitceojesselyuisnotthinkingtoofaradead"),
+        # (os.path.join(base_directory, "Surviving a Hurricane.mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
+        # (os.path.join(base_directory, "Rupi Kaur Opens Up -I Felt Invisible- How To Transcend Trauma & Find Your Self-Worth.mp3"), [(60+21), (2*60+59), (22*60+20), (24*60), (43*60+50), (45*60), ((60*60)+(4*60+20)), ((60*60)+(5*60+30)), ((60*60)+(20*60+50)), ((60*60)+(22*60))], "rupikauropensupifetinvisible"),
+        # (os.path.join(base_directory, "Quinta Brunson.mp3"), [0, 45, ((60*60)+(6*60+35)), ((60*60)+(7*60+45))], "quintabrunson"),
+        # (os.path.join(base_directory, "Israel at War One Year On.mp3"), [0, (2*60+40), (58*60+18), (59*60+49)], "israelatwaroneyearon"),
+        # (os.path.join(base_directory, "Guenther Steiner life on the other side of F1.mp3"), [(9*60+50), (11*60), (19*60), (20*60+30), (32*60), (33*60+15)], "guenthersteinerlifeontheothersideoff1"),
+        # (os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
+        # (os.path.join(base_directory, "Election Special.mp3"), [0, 60,  (20*60+20), (21*60+50), (26*60+50), (28*60+20), (42*60+30), (48*60)], "electionspecial"),
+        # (os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
+        # (os.path.join(base_directory, "Dreaming of Polar Night in Svalbard.mp3"), [0, 60+40], "dreamingofpolarnightinsvalbard"),
+        # (os.path.join(base_directory, "Donald Trump Joins The Show!.mp3"), [(4*60+25), (5*60+30), (12*60+5), (13*60+5), (26*60+45), (27*60+55)], "donaldtrumpjoinstheshow"),
+        # (os.path.join(base_directory, "Different Days.mp3"), [0, 60,  (40*60+20), (40*60+50), ((60*60)+(23*60+45)), ((60*60)+(24*60+18))], "differentdays"),
+        # (os.path.join(base_directory, "Changes in the Big Apple.mp3"), [0, 30,  (15*60+50), (17*60+15), (22*60+30), (22*60+50), (35*60+10), (32*60+45)], "changesinthebigapple"),
+        # (os.path.join(base_directory, "Bitcoin Mining Decentralization with the Datum Protocol at Ocean Mining.mp3"), [0, (60+25), (14*60+20), (18*60), (30*60+50), (33*60+45), (59*60+30), (60*60+2)], "bitcoinminingdecentralizationwiththedatumprotocolatoceanmining"),
         (os.path.join(base_directory, "Billionaire Personality Disorder.mp3"), [0, 30, (23*60+20), (25*60+5), (60*60+50), (60*60+95), ((60*60)+(36*60+5)), ((60*60)+(37*60+45))], "billionairepersonalitydisorder"),
         (os.path.join(base_directory, "Knowing who you are.mp3"), [0, 60, (49*60+25), (52*60+41), ((60*60)+(7*60+30)),  ((60*60)+(11*60+8))], "knowingwhoyouare"),
-
-
-
     ]
 
     # authentication with google cloud
