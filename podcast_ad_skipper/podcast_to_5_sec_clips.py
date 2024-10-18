@@ -2,7 +2,7 @@
 import os
 
 from pydub import AudioSegment
-from upload_to_gcloud import upload_clips_gcs, auth_gc
+from upload_to_gcloud import upload_clips_gcs, auth_gc_storage
 
 
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     # authentication with google cloud
 
-    google_client = auth_gc()
+    google_client = auth_gc_storage()
     # Loop through each file and process mp3:
     for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
         result = split_files(file_name, ad_list, podcast_name, output_directory, google_client)
