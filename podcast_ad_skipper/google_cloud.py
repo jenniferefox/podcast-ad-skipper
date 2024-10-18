@@ -1,13 +1,12 @@
-import json
 import os
 import sys
-from termcolor import colored
-import requests
 from pathlib import Path
 
+import requests
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import storage
 from google.oauth2 import service_account
+from termcolor import colored
 
 
 def auth_gc_storage():
@@ -16,7 +15,7 @@ def auth_gc_storage():
     # Check if running in a Google Cloud environment (e.g., a VM or Cloud Function)
     try:
         # The metadata server is only available on Google Cloud environments
-        response = requests.get('http://metadata.google.internal', timeout=1)
+        response = requests.get("http://metadata.google.internal", timeout=1)
         if response.status_code == 200:
             # Running in Google Cloud, no need to specify credentials
             print("Running in Google Cloud environment.")
@@ -30,12 +29,18 @@ def auth_gc_storage():
             current_dir = Path(__file__).parent
 
             # Define the path to the service account folder (relative to the main project root)
-            service_account_path = current_dir.parent / os.environ.get('GOOGLE_CLOUD_SERVICE_ACCOUNT')
+            service_account_path = current_dir.parent / os.environ.get(
+                "GOOGLE_CLOUD_SERVICE_ACCOUNT"
+            )
 
             # Load and return the service account credentials
-            credentials = service_account.Credentials.from_service_account_file(service_account_path)
+            credentials = service_account.Credentials.from_service_account_file(
+                service_account_path
+            )
 
-            storage_client = storage.Client(project=os.environ.get('GCP_PROJECT_ID'), credentials=credentials)
+            storage_client = storage.Client(
+                project=os.environ.get("GCP_PROJECT_ID"), credentials=credentials
+            )
 
             print("Authenticated successfully! ✅")
             return storage_client
@@ -54,6 +59,18 @@ def auth_gc_storage():
             print(f"An unexpected error occurred: {e}")
             print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
             sys.exit(1)
+
+
+def get_bucket_blobs(client, bucket_name, prefix_name=None):
+    # TODO
+    """A function that returns a list with blob names for a prefixe o all the files whithn the bucket,
+    depends on whether the prefix_name is pass as an argment or not"""
+
+
+def open_file_bytes_gcs(client, bucket_name, blob_name):
+    # TDODO
+    """A functions that return the open file from GS, given the blob name. Error if the blon doesn't exit"""
+
 
 def upload_clips_gcs(client, bucket_name, filenames, blobname):
     """Upload every file in a list to a bucket, concurrently in a process pool.
@@ -94,6 +111,7 @@ def upload_clips_gcs(client, bucket_name, filenames, blobname):
     #     print("Failed to upload {} due to exception: {}".format(name, result))
     # else:
     #     print("Uploaded {} to {}.".format(name, bucket.name))
+
 
 # if __name__ == '__main__':
 #     auth_gc_storage
