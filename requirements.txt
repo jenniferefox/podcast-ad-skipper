@@ -14,3 +14,7 @@ pytest
 google-cloud-storage
 google-auth
 google-cloud-bigquery
+
+# jupyter
+notebook==7.0.5
+notebook_shim==0.2.3
