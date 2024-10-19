@@ -107,10 +107,10 @@ def auth_gc_bigquery():
 
 def append_arrays_to_bq(data, bq_client, table_id):
     '''Uploading data (as dataframes) to BQ'''
+    bq_client = auth_gc_bigquery()
+    # Create df out of the np arrays, to upload to bq
+    # Use WRITE_APPEND to add to the existing table
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-
     job = bq_client.load_table_from_dataframe(data, table_id, job_config=job_config)
-
     print(job.result())
-
     print(f"Appended rows to {table_id}")
