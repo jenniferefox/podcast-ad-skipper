@@ -1,5 +1,5 @@
 from podcast_ad_skipper.google_cloud import *
-from data_preparation import split_files
+from podcast_ad_skipper.data_preparation import split_files
 
 def need_to_change(gcs_client):
     base_directory = 'raw_data/full_podcast' # Add the full audio file here
@@ -39,8 +39,10 @@ def we_need_to_change_name_preprocess_data(prefixes):
 
 def transform_features_into_dataframe(features):
     data = pd.DataFrame(features).T
-    columns = ['spectrogram_np_arrays', 'labels', 'seconds', 'durations', 'podcast_names']
+    columns = ['spectrogram', 'labels', 'seconds', 'durations', 'podcast_names']
     data.columns = columns
+    # data['spectrogram'] = data['spectrogram'][0]
+    data['spectrogram'] = data['spectrogram'].apply(lambda x: x.tolist())
     return data
 
 
