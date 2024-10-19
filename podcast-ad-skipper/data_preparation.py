@@ -6,22 +6,38 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 from pydub import AudioSegment
+from scipy.ndimage import zoom
+
 
 
 # Function to create a spectrogram from an audio file
-def create_spectrogram(audio_file_wav):
+def create_spectrogram(audio_file_wav, sr=16000):
     """
     This function takes 1 input to convert wav files to spectrograms:
     """
 
     #data: is an array representing the amplitude of the audio signal at each sample.
     #sample_rate: is the sampling rate (samples per second)
-    data, sample_rate = librosa.load(audio_file_wav, sr=None) # sr=None to keep the original sample rate (we can change this if needed)
-    spectrogram = librosa.stft(data)  # Short-time Fourier transform
-    spectrogram_db = librosa.amplitude_to_db(abs(spectrogram))  # Convert to decibel scale
+    data, sample_rate = librosa.load(audio_file_wav, sr=sr) # sr=None to keep the original sample rate (we can change this if needed)
+    spectrogram = librosa.feature.melspectrogram(
+        y=data,
+        sr=sr,
+        n_mels=128,  # Number of mel bands
+        fmax=8000    # Maximum frequency
+    )
+    # Short-time Fourier transform
+    spectrogram_db = np.array(librosa.power_to_db(mel_spect, ref=np.max))  # Convert to decibel scale
     return spectrogram_db
 
 # -------------------------------------------------------------------------------------------------
+
+def resize_spectrogram(data, output_size):
+
+    return zoom(data, (96/128, 64/216))
+
+
+# -------------------------------------------------------------------------------------------------
+
 
 # Function to loop through all clip files and generate spectrograms
 def get_features_model (folder_path):
