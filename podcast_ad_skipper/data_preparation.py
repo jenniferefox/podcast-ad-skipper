@@ -114,11 +114,30 @@ def create_spectrogram(audio_file_wav, sr=16000):
 
 # -------------------------------------------------------------------------------------------------
 
-def resize_spectrogram(data, output_size):
+# def resize_spectrogram(data, output_size):
 
-    return zoom(data, (96/128, 64/216))
+#     return zoom(data, (96/128, 64/216))
 
 # -------------------------------------------------------------------------------------------------
+
+def resize_spectrogram(spectrogram, output_size):
+    sp_row, sp_col = spectrogram.shape
+    out_row, out_col = output_size
+    resized_spec = zoom(spectrogram, (out_row/sp_row, out_col/sp_col))
+    return resized_spec
+
+def minmax_scaler(spectrogram):
+    min_val = np.min(spectrogram)
+    max_val = np.max(spectrogram)
+
+    normalised_spectrogram = (spectrogram - min_val) / (max_val - min_val)
+
+    return normalised_spectrogram
+
+def reshape_spectrogram(spectrogram):
+    temp_spectogrram =  np.stack((spectrogram, spectrogram, spectrogram), axis=2)
+    # final_spec = np.expand_dims(temp_spectogrram, axis=0)
+    return temp_spectogrram
 
 
 def get_features_model(clip_audio_files, run_env="gc"):
@@ -166,8 +185,12 @@ def get_features_model(clip_audio_files, run_env="gc"):
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
+        resized_spectrogram =resize_spectrogram(spectrogram, (96,64))
+        scaled_spectrogram = minmax_scaler(resized_spectrogram)
+        reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
+
         # Append the numpy array to the list
-        spectrograms.append(spectrogram)
+        spectrograms.append(reshaped_spectrogram)
         labels.append(is_ad)
         seconds.append(start_time)
         durations.append(duration)
