@@ -76,12 +76,12 @@ def split_files(original_file, ad_list, podcast_name, output_directory, google_c
             output_file = os.path.join(podcast_folder, f'{is_ad}_{tc}_{duration}_{podcast_name}.wav')
 
             if run_env == "local":
-                # Making a clip files:
+                # Save clip locally:
                 new_audio[start_clip:end_clip].export(output_file, format='wav')
                 print(f"Saved clip: {output_file}")
 
             elif run_env == "gc":
-                 # Making a clip files:
+                 # Save clip in Google Cloud Storage:
                 new_clip = new_audio[start_clip:end_clip].export(format='wav')
                 upload_clips_gcs(google_client, os.getenv('BUCKET_NAME'), new_clip, f'{podcast_name}/{is_ad}_{tc}_{duration}_{podcast_name}.wav')
                 print(f"Saved clip in Google Cloud Storage: {is_ad}_{tc}_{duration}_{podcast_name}.wav")
@@ -114,9 +114,9 @@ if __name__ == '__main__':
         # (os.path.join(base_directory, "Quinta Brunson.mp3"), [0, 45, ((60*60)+(6*60+35)), ((60*60)+(7*60+45))], "quintabrunson"),
         # (os.path.join(base_directory, "Israel at War One Year On.mp3"), [0, (2*60+40), (58*60+18), (59*60+49)], "israelatwaroneyearon"),
         # (os.path.join(base_directory, "Guenther Steiner life on the other side of F1.mp3"), [(9*60+50), (11*60), (19*60), (20*60+30), (32*60), (33*60+15)], "guenthersteinerlifeontheothersideoff1"),
-        # (os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
+        #(os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
         # (os.path.join(base_directory, "Election Special.mp3"), [0, 60,  (20*60+20), (21*60+50), (26*60+50), (28*60+20), (42*60+30), (48*60)], "electionspecial"),
-        #(os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
+        # (os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
         # (os.path.join(base_directory, "Dreaming of Polar Night in Svalbard.mp3"), [0, 60+40], "dreamingofpolarnightinsvalbard"),
         # (os.path.join(base_directory, "Donald Trump Joins The Show!.mp3"), [(4*60+25), (5*60+30), (12*60+5), (13*60+5), (26*60+45), (27*60+55)], "donaldtrumpjoinstheshow"),
         # (os.path.join(base_directory, "Different Days.mp3"), [0, 60,  (40*60+20), (40*60+50), ((60*60)+(23*60+45)), ((60*60)+(24*60+18))], "differentdays"),
