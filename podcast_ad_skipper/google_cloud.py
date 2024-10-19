@@ -1,13 +1,23 @@
-import json
+from google.cloud import storage
 import os
+import json
 import sys
+from podcast_ad_skipper.Spectrogram_Conversion import create_spectrogram
 from termcolor import colored
+import pandas as pd
 
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import storage
 from google.oauth2 import service_account
+from google.cloud import bigquery
+
+from podcast_ad_skipper.params import *
 
 
+
+# Authentication for Google Cloud Storage
+
+# add when local a when gcs b
 def auth_gc():
     """Authenticates and returns a Google Cloud Storage client using service account credentials"""
     try:
@@ -35,6 +45,9 @@ def auth_gc():
         print(f"An unexpected error occurred: {e}")
         print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
         sys.exit(1)
+
+
+# Uploading local wav files to GCS
 
 def upload_clips_gcs(client, bucket_name, filenames, blobname):
     """Upload every file in a list to a bucket, concurrently in a process pool.
@@ -78,3 +91,86 @@ def upload_clips_gcs(client, bucket_name, filenames, blobname):
 
 # if __name__ == '__main__':
 #     auth_gc()
+
+
+
+
+# Retrieving GCS files to use in VM preprocessing
+
+def retrieve_files_in_folder(storage_client,bucket_name, prefixes):
+    file_list = []
+    bucket = storage_client.bucket(bucket_name)
+    file_list_google_object = bucket.list_blobs(prefix=prefixes)
+    for file in file_list_google_object:
+        file_list.append(file)
+    return file_list
+
+
+def open_gcs_file(file):
+    audio_file = file.open('rb')
+    return audio_file
+
+
+def transform_all_files_to_spectrograms(storage_client, bucket_name, prefixes, spectrogram_list):
+    file_list = retrieve_files_in_folder(storage_client, bucket_name, prefixes)
+
+    # Use a dash for the folder names e.g. audio_files/
+    # The / helps explicitly indicate that you're targeting files inside a folder
+    # rather than a blob whose name starts with the same string but exists at the root level.
+
+    for file in file_list[:6]:
+        open_file = open_gcs_file(file)
+        spectrogram_db = create_spectrogram(open_file)
+        spectrogram_list.append(spectrogram_db)
+
+
+
+
+# BigQuery
+# Authentication for Google BigQuery
+
+def call_bq_client():
+    """Authenticates and returns a Google Cloud BigQuery client using service account credentials"""
+    try:
+        with open('gcp/podcast-ad-skipper-0dd8dd2c5ac1.json') as source:
+            info = json.load(source)
+
+        bq_credentials = service_account.Credentials.from_service_account_info(info)
+
+        bq_client = bigquery.Client(project=GCP_PROJECT_ID, credentials=bq_credentials)
+        print("Authenticated successfully with BigQuery! ✅")
+
+        return bq_client
+
+    except FileNotFoundError:
+        print("Error: The specified credentials file 'gcp/file_name.json' was not found.")
+        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        sys.exit(1)
+
+    except GoogleAuthError as e:
+        print(f"Error: Authentication failed with Google Cloud: {e}")
+        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        sys.exit(1)
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        sys.exit(1)
+
+
+
+# Transforming np arrays to DFs and uploading to BQ
+
+def append_arrays_to_bq(bq_client, np_array, table_id):
+    # Create df out of the np arrays, to upload to bq
+    columns = [f'col_{i}' for i in range(np_array.shape[1])]
+    df = pd.DataFrame(np_array, columns=columns)
+
+    # Use WRITE_APPEND to add to the existing table
+    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+
+    job = bq_client.load_table_from_dataframe(df, table_id, job_config=job_config)
+
+    print(job.result())
+
+    print(f"Appended rows to {table_id}")
