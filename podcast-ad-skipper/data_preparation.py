@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 from pydub import AudioSegment
 from scipy.ndimage import zoom
 
-
-
 # Function to create a spectrogram from an audio file
 def create_spectrogram(audio_file_wav, sr=16000):
     """
@@ -31,13 +29,13 @@ def create_spectrogram(audio_file_wav, sr=16000):
 
 # -------------------------------------------------------------------------------------------------
 
-def resize_spectrogram(data, output_size):
-
-    return zoom(data, (96/128, 64/216))
-
+def resize_spectrogram(spectrogram, output_size):
+    sp_row, sp_col = spectrogram.shape
+    out_row, out_col = output_size
+    resized_spec = zoom(spectrogram, (out_row/sp_row, out_col/sp_col))
+    return resized_spec
 
 # -------------------------------------------------------------------------------------------------
-
 
 # Function to loop through all clip files and generate spectrograms
 def get_features_model (folder_path):
@@ -81,6 +79,7 @@ def get_features_model (folder_path):
 
             # Create spectrogram and convert to numpy array
             spectrogram = create_spectrogram(file_path)
+            resized_spectrogram =resize_spectrogram(spectrogram, ())
 
             # Append the numpy array to the list
             spectrograms.append(spectrogram)
