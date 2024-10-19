@@ -79,10 +79,10 @@ def get_features_model (folder_path):
 
             # Create spectrogram and convert to numpy array
             spectrogram = create_spectrogram(file_path)
-            resized_spectrogram =resize_spectrogram(spectrogram, ())
+            resized_spectrogram =resize_spectrogram(spectrogram, (96,64))
 
             # Append the numpy array to the list
-            spectrograms.append(spectrogram)
+            spectrograms.append(resized_spectrogram)
             labels.append(is_ad)
             seconds.append(start_time)
             durations.append(duration)
