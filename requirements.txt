@@ -3,6 +3,7 @@ scipy
 librosa
 pydub
 termcolor
+requests
 
 # Some example packages
 pandas
