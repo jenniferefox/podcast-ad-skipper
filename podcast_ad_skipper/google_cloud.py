@@ -131,8 +131,8 @@ def append_arrays_to_bq(data, bq_client, table_id):
     job_config = bigquery.LoadJobConfig(
         write_disposition="WRITE_APPEND",
         schema=[
-            bigquery.SchemaField("spectrogram", "FLOAT", mode="REPEATED"),
-            bigquery.SchemaField("labels", "STRING"),
+            bigquery.SchemaField("spectrogram", "STRING"),
+            bigquery.SchemaField("labels", "INTEGER"),
             bigquery.SchemaField("seconds", "INTEGER"),
             bigquery.SchemaField("durations", "INTEGER"),
             bigquery.SchemaField("podcast_names", "STRING")

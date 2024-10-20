@@ -29,20 +29,21 @@ def we_need_to_change_name_preprocess_data(prefixes):
     # Use a dash for the folder names e.g. audio_files/
     # The / helps explicitly indicate that you're targeting files inside a folder
     # rather than a blob whose name starts with the same string but exists at the root level.
-
     for file in file_list[:6]:
         open_file = open_gcs_file(file)
 
 
+def serialise_array(array):
+    '''Converts the spectrogram's 3D array into a JSON string representation'''
+    return json.dumps(array.tolist())
 
-# Transforming np arrays to DFs and uploading to BQ
 
 def transform_features_into_dataframe(features):
     data = pd.DataFrame(features).T
     columns = ['spectrogram', 'labels', 'seconds', 'durations', 'podcast_names']
     data.columns = columns
-    # data['spectrogram'] = data['spectrogram'][0]
-    data['spectrogram'] = data['spectrogram'].apply(lambda x: x.tolist())
+    # Apply the serialise function to the spectrogram column
+    data['spectrogram'] = data['spectrogram'].apply(serialise_array)
     return data
 
 
