@@ -1,12 +1,11 @@
-import json
 import sys
-from termcolor import colored
-import requests
 from pathlib import Path
+
+import requests
 from google.auth.exceptions import GoogleAuthError
-from google.cloud import storage
+from google.cloud import bigquery, storage
 from google.oauth2 import service_account
-from google.cloud import bigquery
+from termcolor import colored
 
 from podcast_ad_skipper.params import *
 
@@ -38,13 +37,17 @@ def auth_gc_storage():
                 service_account_path
             )
 
-            storage_client = storage.Client(project=GCP_PROJECT_ID, credentials=credentials)
+            storage_client = storage.Client(
+                project=GCP_PROJECT_ID, credentials=credentials
+            )
 
             print("Authenticated successfully with GCS! ✅")
             return storage_client
 
         except FileNotFoundError:
-            print("Error: The specified credentials file 'gcp/file_name.json' was not found.")
+            print(
+                "Error: The specified credentials file 'gcp/file_name.json' was not found."
+            )
             print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
             sys.exit(1)
 
@@ -77,8 +80,8 @@ def upload_clips_gcs(client, bucket_name, filenames, blobname):
         print("Uploaded {} to {}.".format(blobname, bucket_name))
 
 
-def retrieve_files_in_folder(storage_client,bucket_name, prefixes):
-    '''Retrieving GCS files to use in VM preprocessing'''
+def retrieve_files_in_folder(storage_client, bucket_name, prefixes):
+    """Retrieving GCS files to use in VM preprocessing"""
     file_list = []
     bucket = storage_client.bucket(bucket_name)
     file_list_google_object = bucket.list_blobs(prefix=prefixes)
@@ -88,18 +91,23 @@ def retrieve_files_in_folder(storage_client,bucket_name, prefixes):
 
 
 def open_gcs_file(file):
-    '''Open audio file from GCS'''
-    audio_file = file.open('rb')
+    """Open audio file from GCS"""
+    audio_file = file.open("rb")
     return audio_file
 
 
 def auth_gc_bigquery():
     """Authenticates and returns a Google Cloud BigQuery client using service account credentials"""
     try:
-        with open('gcp/podcast-ad-skipper-0dd8dd2c5ac1.json') as source:
-            info = json.load(source)
+        current_dir = Path(__file__).parent
 
-        bq_credentials = service_account.Credentials.from_service_account_info(info)
+        # Define the path to the service account folder (relative to the main project root)
+        service_account_path = current_dir.parent / GOOGLE_CLOUD_SERVICE_ACCOUNT
+
+        # Load and return the service account credentials
+        bq_credentials = service_account.Credentials.from_service_account_file(
+            service_account_path
+        )
 
         bq_client = bigquery.Client(project=GCP_PROJECT_ID, credentials=bq_credentials)
         print("Authenticated successfully with BigQuery! ✅")
@@ -107,21 +115,21 @@ def auth_gc_bigquery():
         return bq_client
 
     except FileNotFoundError:
-        print("Error: The specified credentials file 'gcp/file_name.json' was not found.")
-        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        print(
+            "Error: The specified credentials file 'gcp/file_name.json' was not found."
+        )
+        print("Failed to authenticate with Big Query ❌", "red")
         sys.exit(1)
 
     except GoogleAuthError as e:
         print(f"Error: Authentication failed with Google Cloud: {e}")
-        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        print("Failed to authenticate with Big Query ❌", "red")
         sys.exit(1)
 
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        print("Failed to authenticate with Google Cloud Storage ❌", "red")
+        print("Failed to authenticate with Big Query ❌", "red")
         sys.exit(1)
-
-
 
 def append_arrays_to_bq(data, bq_client, table_id):
     '''Uploading data (as dataframes) to BQ'''
@@ -143,6 +151,47 @@ def append_arrays_to_bq(data, bq_client, table_id):
     print(f"Appended rows to {table_id}")
 
 
-if __name__ == '__main__':
+def insert_data_to_bq(data, bq_client, table_id):
+    """Uploading data into BQ using json"""
+    # Insert rows into the BigQuery table
+    errors = bq_client.insert_rows_json(table=table_id, json_rows=data)
+
+    if errors == []:
+        print("New rows have been added.")
+    else:
+        print("Encountered errors while inserting rows: {errors}")
+
+
+def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
+    """Given a string with columns and an table id, this function returns the result of
+    the query with necessary columns. Also, give the option to limit the number of records to output
+    """
+    try:
+        if limit is None:
+            query = f"""SELECT {columns}
+                        from {table_id}"""
+        else:
+            query = f"""SELECT {columns}
+                    from {table_id}
+                    limit {limit}"""
+
+        # Run the query
+        query_job = bq_client.query(query)
+
+        results = query_job.result()
+
+        if results.total_rows == 0:
+            print(colored("Query returned no results", "yellow"))
+            return None
+        else:
+            print(colored(f"Query returned {results.total_rows} results", "green"))
+            return results
+
+    except Exception as e:
+        print(colored(f"An error occurred: {e}", "red"))
+
+
+
+if __name__ == "__main__":
     auth_gc_storage()
     auth_gc_bigquery()

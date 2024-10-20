@@ -1,12 +1,13 @@
-import numpy as np
-import pandas as pd
+import json
 import os
-import time
+
 import librosa
 import librosa.display
-import matplotlib.pyplot as plt
+import numpy as np
 from pydub import AudioSegment
 from scipy.ndimage import zoom
+
+from podcast_ad_skipper.google_cloud import upload_clips_gcs
 
 
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
@@ -162,8 +163,8 @@ def get_features_model(clip_audio_files, run_env="gc"):
     elif run_env == 'gc':
         file_list = clip_audio_files
 
-    print(f"Processing files: total {len(file_list)}")
-    for filename in file_list[:4]:
+    print(f"Processing files: total {len(file_list[:20])}")
+    for filename in file_list[:20]:
         # Split the filename by underscore
         if run_env == "local":
             filename_parts = filename.split('_')
@@ -198,7 +199,19 @@ def get_features_model(clip_audio_files, run_env="gc"):
 
     return spectrograms, labels, seconds, durations, podcast_names
 
-
+def get_bq_processed_data(output):
+    if output:
+        spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq = [], [], [], [], []
+        for row in output:
+            spectrogram_bq.append(np.array(json.loads(row[0])))
+            labels_bq.append(row[1])
+            if row[2]:
+                seconds_bq.append(row[1])
+            if row[3]:
+                duration_bq.append(row[1])
+            if row[4]:
+                podcast_name_bq.append(row[1])
+        return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
 
 # if __name__ == '__main__':
 #     #Running the function with podcasts and creating a separate folder for each podcast
