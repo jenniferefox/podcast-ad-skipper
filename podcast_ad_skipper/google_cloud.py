@@ -1,10 +1,8 @@
-from google.cloud import storage
-import os
 import json
 import sys
 from termcolor import colored
-import pandas as pd
-
+import requests
+from pathlib import Path
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import storage
 from google.oauth2 import service_account
@@ -33,20 +31,16 @@ def auth_gc_storage():
             current_dir = Path(__file__).parent
 
             # Define the path to the service account folder (relative to the main project root)
-            service_account_path = current_dir.parent / os.environ.get(
-                "GOOGLE_CLOUD_SERVICE_ACCOUNT"
-            )
+            service_account_path = current_dir.parent / GOOGLE_CLOUD_SERVICE_ACCOUNT
 
             # Load and return the service account credentials
             credentials = service_account.Credentials.from_service_account_file(
                 service_account_path
             )
 
-            storage_client = storage.Client(
-                project=os.environ.get("GCP_PROJECT_ID"), credentials=credentials
-            )
+            storage_client = storage.Client(project=GCP_PROJECT_ID, credentials=credentials)
 
-            print("Authenticated successfully! ✅")
+            print("Authenticated successfully with GCS! ✅")
             return storage_client
 
         except FileNotFoundError:
@@ -63,6 +57,8 @@ def auth_gc_storage():
             print(f"An unexpected error occurred: {e}")
             print(colored("Failed to authenticate with Google Cloud Storage ❌", "red"))
             sys.exit(1)
+
+
 def upload_clips_gcs(client, bucket_name, filenames, blobname):
     """Upload every file in a list to a bucket, concurrently in a process pool.
 
@@ -145,3 +141,8 @@ def append_arrays_to_bq(data, bq_client, table_id):
     job = bq_client.load_table_from_dataframe(data, table_id, job_config=job_config)
     print(job.result())
     print(f"Appended rows to {table_id}")
+
+
+if __name__ == '__main__':
+    auth_gc_storage()
+    auth_gc_bigquery()
