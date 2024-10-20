@@ -131,8 +131,6 @@ def auth_gc_bigquery():
         print("Failed to authenticate with Big Query ❌", "red")
         sys.exit(1)
 
-
-
 def append_arrays_to_bq(data, bq_client, table_id):
     '''Uploading data (as dataframes) to BQ'''
     bq_client = auth_gc_bigquery()
@@ -151,6 +149,47 @@ def append_arrays_to_bq(data, bq_client, table_id):
     job = bq_client.load_table_from_dataframe(data, table_id, job_config=job_config)
     print(job.result())
     print(f"Appended rows to {table_id}")
+
+
+def insert_data_to_bq(data, bq_client, table_id):
+    """Uploading data into BQ using json"""
+    # Insert rows into the BigQuery table
+    errors = bq_client.insert_rows_json(table=table_id, json_rows=data)
+
+    if errors == []:
+        print("New rows have been added.")
+    else:
+        print("Encountered errors while inserting rows: {errors}")
+
+
+def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
+    """Given a string with columns and an table id, this function returns the result of
+    the query with necessary columns. Also, give the option to limit the number of records to output
+    """
+    try:
+        if limit is None:
+            query = f"""SELECT {columns}
+                        from {table_id}"""
+        else:
+            query = f"""SELECT {columns}
+                    from {table_id}
+                    limit {limit}"""
+
+        # Run the query
+        query_job = bq_client.query(query)
+
+        results = query_job.result()
+
+        if results.total_rows == 0:
+            print(colored("Query returned no results", "yellow"))
+            return None
+        else:
+            print(colored(f"Query returned {results.total_rows} results", "green"))
+            return results
+
+    except Exception as e:
+        print(colored(f"An error occurred: {e}", "red"))
+
 
 
 if __name__ == "__main__":
