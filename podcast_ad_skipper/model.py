@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from keras.applications import VGG16
-import cv2 as cv
 from keras import layers, models, Model
 from keras.optimizers import Adam
 import tensorflow as tf
