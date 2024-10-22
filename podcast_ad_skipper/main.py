@@ -1,4 +1,5 @@
 from podcast_ad_skipper.google_cloud import *
+from podcast_ad_skipper.model import *
 from podcast_ad_skipper.data_preparation import split_files
 import pandas as pd
 import json
@@ -58,8 +59,21 @@ def transform_features_into_dataframe(features):
     return data
 
 
+def train_plot_accuracy(X_train, y_train, X_test, y_test):
+    model = build_baseline_model(
+        input_shape=(224,224,3),
+        freeze_base=True
+    )
 
+    history = model.fit(
+        X_train,
+        y_train,
+        batch_size=16,
+        epochs=2,
+        validation_data=(X_test,y_test)
+    )
 
+    return plot_history(history)
 
 if __name__ == "__main__":
 
