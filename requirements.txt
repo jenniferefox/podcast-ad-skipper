@@ -24,3 +24,8 @@ notebook_shim==0.2.3
 
 # BigQuery
 pyarrow
+
+#Model
+cv2
+keras
+tensorflow
