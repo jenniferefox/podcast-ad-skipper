@@ -13,11 +13,10 @@ from podcast_ad_skipper.google_cloud import upload_clips_gcs
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
 
     """
-    This function takes 3 inputs to convert mp3 or wav files:
-    The audio file that is to be split up
-    A list of integers which shows when each ad starts and ends. The list must be an even length to include the in and out time of each ad.
-    the name of the podcast, to be used in the final file output name
-    IMPORTANT Before running this, make sure that your mp3/wav file is saved in the same folder. You may need to copy this in your raw_data folder
+    This function takes an original audio file name, list of integers showing
+    when each ad starts and ends and a podcast name and splits up the original
+    file into 5 second chunks, naming each one according to whether it contains
+    ads or not.
     """
 
     # Create a folder for the podcast and their clips:
@@ -97,7 +96,7 @@ def split_files(original_file, ad_list, podcast_name, output_directory, google_c
 
 def create_spectrogram(audio_file_wav, sr=16000):
     """
-    This function takes 1 input to convert wav files to spectrograms:
+    Converts wav files to spectrograms.
     """
 
     #data: is an array representing the amplitude of the audio signal at each sample.
@@ -110,16 +109,8 @@ def create_spectrogram(audio_file_wav, sr=16000):
         fmax=8000    # Maximum frequency
     )
     # Short-time Fourier transform
-    spectrogram_db = np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
-    return spectrogram_db
+    return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
 
-# -------------------------------------------------------------------------------------------------
-
-# def resize_spectrogram(data, output_size):
-
-#     return zoom(data, (96/128, 64/216))
-
-# -------------------------------------------------------------------------------------------------
 
 def resize_spectrogram(spectrogram, output_size):
     sp_row, sp_col = spectrogram.shape
@@ -136,20 +127,12 @@ def minmax_scaler(spectrogram):
     return normalised_spectrogram
 
 def reshape_spectrogram(spectrogram):
-    temp_spectogrram =  np.stack((spectrogram, spectrogram, spectrogram), axis=2)
-    # final_spec = np.expand_dims(temp_spectogrram, axis=0)
-    return temp_spectogrram
+    return np.stack((spectrogram, spectrogram, spectrogram), axis=2)
 
 
-def get_features_model(clip_audio_files, run_env="gc"):
+def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
     """
-    This function takes 1 input to convert each spectrogram into a list of np.array():
-    From this fuction we will get the following:
-    spectrograms: This will store the spectrograms of each clip
-    labels: This will store the labels of each clip
-    seconds: Number of seconds to consider for each clip
-    durations: Duration of the full audio file
-    podcast_names: This will store the podcast names of each clip
+    Converts spectrograms into np arrays.
     """
     spectrograms = [] # This will store the spectrograms of each clip
     labels = []  # This will store the labels of each clip
@@ -186,7 +169,7 @@ def get_features_model(clip_audio_files, run_env="gc"):
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
-        resized_spectrogram =resize_spectrogram(spectrogram, (96,64))
+        resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
         scaled_spectrogram = minmax_scaler(resized_spectrogram)
         reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
 
