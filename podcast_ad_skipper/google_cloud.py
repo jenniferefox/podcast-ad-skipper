@@ -131,25 +131,6 @@ def auth_gc_bigquery():
         print("Failed to authenticate with Big Query ❌", "red")
         sys.exit(1)
 
-def append_arrays_to_bq(data, bq_client, table_id):
-    '''Uploading data (as dataframes) to BQ'''
-    bq_client = auth_gc_bigquery()
-    # Create df out of the np arrays, to upload to bq
-    # Use WRITE_APPEND to add to the existing table
-    job_config = bigquery.LoadJobConfig(
-        write_disposition="WRITE_APPEND",
-        schema=[
-            bigquery.SchemaField("spectrogram", "STRING"),
-            bigquery.SchemaField("labels", "INTEGER"),
-            bigquery.SchemaField("seconds", "INTEGER"),
-            bigquery.SchemaField("durations", "INTEGER"),
-            bigquery.SchemaField("podcast_names", "STRING")
-        ]
-    )
-    job = bq_client.load_table_from_dataframe(data, table_id, job_config=job_config)
-    print(job.result())
-    print(f"Appended rows to {table_id}")
-
 
 def insert_data_to_bq(data, bq_client, table_id):
     """Uploading data into BQ using json"""
@@ -159,7 +140,7 @@ def insert_data_to_bq(data, bq_client, table_id):
     if errors == []:
         print("New rows have been added.")
     else:
-        print("Encountered errors while inserting rows: {errors}")
+        print(f"Encountered errors while inserting rows: {errors}")
 
 
 def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
