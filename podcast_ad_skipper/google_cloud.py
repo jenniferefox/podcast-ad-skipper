@@ -99,56 +99,49 @@ def open_gcs_file(file):
 def auth_gc_bigquery():
     """Authenticates and returns a Google Cloud BigQuery client using service account credentials"""
     try:
-        current_dir = Path(__file__).parent
+        # The metadata server is only available on Google Cloud environments
+        response = requests.get("http://metadata.google.internal", timeout=1)
+        if response.status_code == 200:
+            # Running in Google Cloud, no need to specify credentials
+            print("Running in Google Cloud environment.")
+            print("Authenticated successfully! ✅")
+            return bigquery.Client()
 
-        # Define the path to the service account folder (relative to the main project root)
-        service_account_path = current_dir.parent / GOOGLE_CLOUD_SERVICE_ACCOUNT
+    except (requests.exceptions.RequestException, ValueError):
+        # Running locally, load credentials from a file
+        print("Running in local environment.")
+        try:
+            current_dir = Path(__file__).parent
 
-        # Load and return the service account credentials
-        bq_credentials = service_account.Credentials.from_service_account_file(
-            service_account_path
-        )
+            # Define the path to the service account folder (relative to the main project root)
+            service_account_path = current_dir.parent / GOOGLE_CLOUD_SERVICE_ACCOUNT
 
-        bq_client = bigquery.Client(project=GCP_PROJECT_ID, credentials=bq_credentials)
-        print("Authenticated successfully with BigQuery! ✅")
+            # Load and return the service account credentials
+            bq_credentials = service_account.Credentials.from_service_account_file(
+                service_account_path
+            )
 
-        return bq_client
+            bq_client = bigquery.Client(project=GCP_PROJECT_ID, credentials=bq_credentials)
+            print("Authenticated successfully with BigQuery! ✅")
 
-    except FileNotFoundError:
-        print(
-            "Error: The specified credentials file 'gcp/file_name.json' was not found."
-        )
-        print("Failed to authenticate with Big Query ❌", "red")
-        sys.exit(1)
+            return bq_client
 
-    except GoogleAuthError as e:
-        print(f"Error: Authentication failed with Google Cloud: {e}")
-        print("Failed to authenticate with Big Query ❌", "red")
-        sys.exit(1)
+        except FileNotFoundError:
+            print(
+                "Error: The specified credentials file 'gcp/file_name.json' was not found."
+            )
+            print("Failed to authenticate with Big Query ❌", "red")
+            sys.exit(1)
 
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        print("Failed to authenticate with Big Query ❌", "red")
-        sys.exit(1)
+        except GoogleAuthError as e:
+            print(f"Error: Authentication failed with Google Cloud: {e}")
+            print("Failed to authenticate with Big Query ❌", "red")
+            sys.exit(1)
 
-def append_arrays_to_bq(data, bq_client, table_id):
-    '''Uploading data (as dataframes) to BQ'''
-    bq_client = auth_gc_bigquery()
-    # Create df out of the np arrays, to upload to bq
-    # Use WRITE_APPEND to add to the existing table
-    job_config = bigquery.LoadJobConfig(
-        write_disposition="WRITE_APPEND",
-        schema=[
-            bigquery.SchemaField("spectrogram", "STRING"),
-            bigquery.SchemaField("labels", "INTEGER"),
-            bigquery.SchemaField("seconds", "INTEGER"),
-            bigquery.SchemaField("durations", "INTEGER"),
-            bigquery.SchemaField("podcast_names", "STRING")
-        ]
-    )
-    job = bq_client.load_table_from_dataframe(data, table_id, job_config=job_config)
-    print(job.result())
-    print(f"Appended rows to {table_id}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            print("Failed to authenticate with Big Query ❌", "red")
+            sys.exit(1)
 
 
 def insert_data_to_bq(data, bq_client, table_id):
@@ -159,7 +152,7 @@ def insert_data_to_bq(data, bq_client, table_id):
     if errors == []:
         print("New rows have been added.")
     else:
-        print("Encountered errors while inserting rows: {errors}")
+        print(f"Encountered errors while inserting rows: {errors}")
 
 
 def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
