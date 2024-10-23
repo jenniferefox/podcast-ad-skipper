@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-from keras.applications import VGG16
-from keras import layers, models, Model
-from keras.optimizers import Adam
-import tensorflow as tf
+# from keras.applications import VGG16
+# from keras import layers, models, Model
+# from keras.optimizers import Adam
+# import tensorflow as tf
 
 def build_baseline_model(input_shape=(224,224,3), freeze_base=True):
     base_model = tf.keras.applications.VGG16(
