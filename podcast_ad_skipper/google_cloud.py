@@ -144,15 +144,16 @@ def auth_gc_bigquery():
             sys.exit(1)
 
 
-def insert_data_to_bq(data, bq_client, table_id):
-    """Uploading data into BQ using json"""
-    # Insert rows into the BigQuery table
-    errors = bq_client.insert_rows_json(table=table_id, json_rows=data)
+def insert_data_to_bq(rows_to_insert, bq_client, table_id, data_chunks):
+    """Uploading data into BQ using json in batches of specified size (default: 5)."""
+
+    errors = bq_client.insert_rows_json(table=table_id, json_rows=rows_to_insert)
 
     if errors == []:
-        print("New rows have been added.")
+        print(f"Batch of {data_chunks} rows has been added.")
     else:
         print(f"Encountered errors while inserting rows: {errors}")
+
 
 
 def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
