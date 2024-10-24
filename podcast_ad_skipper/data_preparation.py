@@ -94,6 +94,14 @@ def split_files(original_file, ad_list, podcast_name, output_directory, google_c
     return 'finished'
 
 
+def make_chunks(file_list, chunk_size):
+    """Split the data into chunks of a specified size."""
+    data_chunks = []
+    for i in range(0, len(file_list), chunk_size):
+        data_chunks.append(file_list[i:i + chunk_size])
+    return data_chunks
+
+
 def create_spectrogram(audio_file_wav, sr=16000):
     """
     Converts wav files to spectrograms.
@@ -146,8 +154,7 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
     elif run_env == 'gc':
         file_list = clip_audio_files
 
-    print(f"Processing files: total {len(file_list[:20])}")
-    for filename in file_list[:20]:
+    for filename in file_list:
         # Split the filename by underscore
         if run_env == "local":
             filename_parts = filename.split('_')
@@ -169,8 +176,8 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
-        resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
-        scaled_spectrogram = minmax_scaler(resized_spectrogram)
+        # resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
+        scaled_spectrogram = minmax_scaler(spectrogram)
         reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
 
         # Append the numpy array to the list
@@ -181,6 +188,7 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
         podcast_names.append(podcast_name)
 
     return spectrograms, labels, seconds, durations, podcast_names
+
 
 def get_bq_processed_data(output):
     if output:
