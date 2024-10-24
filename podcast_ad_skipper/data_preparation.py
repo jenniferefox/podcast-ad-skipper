@@ -9,6 +9,7 @@ from scipy.ndimage import zoom
 
 from podcast_ad_skipper.google_cloud import upload_clips_gcs
 
+# ----------------- Function to split the audio files ----------------- #
 
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
 
@@ -93,6 +94,7 @@ def split_files(original_file, ad_list, podcast_name, output_directory, google_c
     is_ad = '0'
     return 'finished'
 
+# ----------------- Functions to convert audio clips to spectrograms ----------------- #
 
 def create_spectrogram(audio_file_wav, sr=16000):
     """
@@ -111,6 +113,7 @@ def create_spectrogram(audio_file_wav, sr=16000):
     # Short-time Fourier transform
     return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
 
+# ----------------- Functions to process the spectrograms ----------------- #
 
 def resize_spectrogram(spectrogram, output_size):
     sp_row, sp_col = spectrogram.shape
@@ -129,6 +132,7 @@ def minmax_scaler(spectrogram):
 def reshape_spectrogram(spectrogram):
     return np.stack((spectrogram, spectrogram, spectrogram), axis=2)
 
+# ----------------- Functions to get the features for the model ----------------- #
 
 def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
     """
@@ -182,6 +186,8 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
 
     return spectrograms, labels, seconds, durations, podcast_names
 
+# ----------------- Functions to get the processed data from Big Query ----------------- #
+
 def get_bq_processed_data(output):
     if output:
         spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq = [], [], [], [], []
@@ -193,7 +199,7 @@ def get_bq_processed_data(output):
             if row[3]:
                 duration_bq.append(row[3])
             if row[4]:
-                podcast_name_bq.append(row[4])
+
         return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
 
 # if __name__ == '__main__':
@@ -221,7 +227,7 @@ def get_bq_processed_data(output):
 #         # (os.path.join(base_directory, "Quinta Brunson.mp3"), [0, 45, ((60*60)+(6*60+35)), ((60*60)+(7*60+45))], "quintabrunson"),
 #         # (os.path.join(base_directory, "Israel at War One Year On.mp3"), [0, (2*60+40), (58*60+18), (59*60+49)], "israelatwaroneyearon"),
 #         # (os.path.join(base_directory, "Guenther Steiner life on the other side of F1.mp3"), [(9*60+50), (11*60), (19*60), (20*60+30), (32*60), (33*60+15)], "guenthersteinerlifeontheothersideoff1"),
-#         #(os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
+#         # (os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
 #         # (os.path.join(base_directory, "Election Special.mp3"), [0, 60,  (20*60+20), (21*60+50), (26*60+50), (28*60+20), (42*60+30), (48*60)], "electionspecial"),
 #         # (os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
 #         # (os.path.join(base_directory, "Dreaming of Polar Night in Svalbard.mp3"), [0, 60+40], "dreamingofpolarnightinsvalbard"),
@@ -229,22 +235,21 @@ def get_bq_processed_data(output):
 #         # (os.path.join(base_directory, "Different Days.mp3"), [0, 60,  (40*60+20), (40*60+50), ((60*60)+(23*60+45)), ((60*60)+(24*60+18))], "differentdays"),
 #         # (os.path.join(base_directory, "Changes in the Big Apple.mp3"), [0, 30,  (15*60+50), (17*60+15), (22*60+30), (22*60+50), (35*60+10), (32*60+45)], "changesinthebigapple"),
 #         # (os.path.join(base_directory, "Bitcoin Mining Decentralization with the Datum Protocol at Ocean Mining.mp3"), [0, (60+25), (14*60+20), (18*60), (30*60+50), (33*60+45), (59*60+30), (60*60+2)], "bitcoinminingdecentralizationwiththedatumprotocolatoceanmining"),
-#         #(os.path.join(base_directory, "Billionaire Personality Disorder.mp3"), [0, 30, (23*60+20), (25*60+5), (60*60+50), (60*60+95), ((60*60)+(36*60+5)), ((60*60)+(37*60+45))], "billionairepersonalitydisorder"),
-#         #(os.path.join(base_directory, "Knowing who you are.mp3"), [0, 60, (49*60+25), (52*60+41), ((60*60)+(7*60+30)),  ((60*60)+(11*60+8))], "knowingwhoyouare"),
+#         # (os.path.join(base_directory, "Billionaire Personality Disorder.mp3"), [0, 30, (23*60+20), (25*60+5), (60*60+50), (60*60+95), ((60*60)+(36*60+5)), ((60*60)+(37*60+45))], "billionairepersonalitydisorder"),
+#         # (os.path.join(base_directory, "Knowing who you are.mp3"), [0, 60, (49*60+25), (52*60+41), ((60*60)+(7*60+30)),  ((60*60)+(11*60+8))], "knowingwhoyouare"),
 #     ]
 
 #     # authentication with google cloud
-
-#     google_client = auth_gc()
+#     # google_client = auth_gc()
 #     # Loop through each file and process mp3:
 #     for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
 #         result = split_files(file_name, ad_list, podcast_name, output_directory, google_client)
 
 #         print(f'Processing {podcast_name}: {result}')
 
-# Data folder path: Change this to the path where your audio clips are stored
-# folder_path = '../raw_data/5_sec_clips/drewbarrymoreasksaboutboogers' # Change this to the path where your audio clips are stored in the Google Colab environment
-# all_spectrograms = get_features_model(folder_path) # Get the spectrograms and labels - THIS IS THE OUTPUT FOR OUR MODEL AND WE NEED TO ADD IR TO BIG QUERY !!
+# # Data folder path: Change this to the path where your audio clips are stored
+# # folder_path = '../raw_data/5_sec_clips/drewbarrymoreasksaboutboogers' # Change this to the path where your audio clips are stored in the Google Colab environment
+# # all_spectrograms = get_features_model(folder_path) # Get the spectrograms and labels - THIS IS THE OUTPUT FOR OUR MODEL AND WE NEED TO ADD IR TO BIG QUERY !!
 
-# # Output the number of spectrograms processed
-# print(f"Processed {len(all_spectrograms[0])} spectrograms.")
+# # # Output the number of spectrograms processed
+# # print(f"Processed {len(all_spectrograms[0])} spectrograms.")
