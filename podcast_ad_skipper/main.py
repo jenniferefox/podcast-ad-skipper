@@ -4,7 +4,7 @@ from podcast_ad_skipper.data_preparation import split_files, make_chunks
 import pandas as pd
 import json
 from podcast_ad_skipper.google_cloud import auth_gc_storage, auth_gc_bigquery
-from podcast_ad_skipper.data_preparation import get_features_model, get_bq_processed_data
+from podcast_ad_skipper.data_preparation import get_features_model
 
 def need_to_change(gcs_client):
     base_directory = 'raw_data/full_podcast' # Add the full audio file here
