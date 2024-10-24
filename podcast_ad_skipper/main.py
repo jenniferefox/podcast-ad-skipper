@@ -3,6 +3,8 @@ from podcast_ad_skipper.model import *
 from podcast_ad_skipper.data_preparation import split_files
 import pandas as pd
 import json
+from podcast_ad_skipper.google_cloud import auth_gc_storage, auth_gc_bigquery
+from podcast_ad_skipper.data_preparation import get_features_model, get_bq_processed_data
 
 def need_to_change(gcs_client):
     base_directory = 'raw_data/full_podcast' # Add the full audio file here
@@ -23,40 +25,37 @@ def need_to_change(gcs_client):
         print(f'Processing {podcast_name}: {result}')
 
 # Main function, to be updated
-def we_need_to_change_name_preprocess_data(prefixes):
+def get_processed_training_data(prefixes, table_name):
     '''Transform audio files into spectrogram'''
-    storage_client = auth_gc()
+    storage_client = auth_gc_storage()
+
     bucket_name = BUCKET_NAME
+
     file_list = retrieve_files_in_folder(storage_client, bucket_name, prefixes)
 
-    # Use a dash for the folder names e.g. audio_files/
-    # The / helps explicitly indicate that you're targeting files inside a folder
-    # rather than a blob whose name starts with the same string but exists at the root level.
-    for file in file_list[:6]:
-        open_file = open_gcs_file(file)
+    # Do we need this?
+    # open_file = open_gcs_file(file_list[0])
+
+    features = get_features_model(file_list)
+
+    bq_client = auth_gc_bigquery()
+
+    table_id = f"{GCP_PROJECT_ID}.{BQ_DATASET}.{table_name}"
 
     rows_to_insert = [
             {
                 "spectrogram": json.dumps(features[0][i].tolist()),
-                "label": features[1][i],
+                "labels": features[1][i],
                 "seconds": features[2][i],
                 "duration": features[3][i],
-                "podcast_name": features[3][i],
-            } for i  in range(len(features[0]))
+                "podcast_names": features[4][i],
+            } for i in range(len(features[0]))
         ]
 
-def serialise_array(array):
-    '''Converts the spectrogram's 3D array into a JSON string representation'''
-    return json.dumps(array.tolist())
+    insert_data_to_bq(rows_to_insert, bq_client, table_id)
 
+    print('Done!!')
 
-def transform_features_into_dataframe(features):
-    data = pd.DataFrame(features).T
-    columns = ['spectrogram', 'labels', 'seconds', 'durations', 'podcast_names']
-    data.columns = columns
-    # Apply the serialise function to the spectrogram column
-    data['spectrogram'] = data['spectrogram'].apply(serialise_array)
-    return data
 
 
 def train_plot_accuracy(X_train, y_train, X_test, y_test):
@@ -76,5 +75,7 @@ def train_plot_accuracy(X_train, y_train, X_test, y_test):
     return plot_history(history)
 
 if __name__ == "__main__":
-
-    we_need_to_change_name_preprocess_data
+    prefixes = GCP_PREFIXES[:1]
+    table_name = "test6"
+    for prefix in prefixes:
+        get_processed_training_data(prefixes, table_name)
