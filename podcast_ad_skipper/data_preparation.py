@@ -205,7 +205,7 @@ def get_bq_processed_data(output):
             if row[3]:
                 duration_bq.append(row[3])
             if row[4]:
-
+                podcast_name_bq.append(row[4])
         return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
 
 # if __name__ == '__main__':
