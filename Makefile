@@ -15,3 +15,6 @@ get_fuatures_model:
 
 install:
 	pip install -e .
+
+run_api:
+	uvicorn podcast_ad_skipper.fast_api:app --reload
