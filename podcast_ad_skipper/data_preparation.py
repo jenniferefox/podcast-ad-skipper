@@ -7,7 +7,8 @@ import numpy as np
 from pydub import AudioSegment
 from scipy.ndimage import zoom
 
-from podcast_ad_skipper.google_cloud import upload_clips_gcs
+from podcast_ad_skipper.google_cloud import *
+from podcast_ad_skipper.params import *
 
 # ----------------- Function to split the audio files ----------------- #
 
@@ -88,13 +89,21 @@ def split_files(original_file, ad_list, podcast_name, output_directory, google_c
             elif run_env == "gc":
                  # Save clip in Google Cloud Storage:
                 new_clip = new_audio[start_clip:end_clip].export(format='wav')
-                upload_clips_gcs(google_client, os.getenv('BUCKET_NAME'), new_clip, f'{podcast_name}/{is_ad}_{tc}_{duration}_{podcast_name}.wav')
+                upload_clips_gcs(google_client, BUCKET_NAME, new_clip, f'{podcast_name}/{is_ad}_{tc}_{duration}_{podcast_name}.wav')
                 print(f"Saved clip in Google Cloud Storage: {is_ad}_{tc}_{duration}_{podcast_name}.wav")
 
     is_ad = '0'
     return 'finished'
 
 # ----------------- Functions to convert audio clips to spectrograms ----------------- #
+
+def make_chunks(file_list, chunk_size):
+    """Split the data into chunks of a specified size."""
+    data_chunks = []
+    for i in range(0, len(file_list), chunk_size):
+        data_chunks.append(file_list[i:i + chunk_size])
+    return data_chunks
+
 
 def create_spectrogram(audio_file_wav, sr=16000):
     """
@@ -150,8 +159,7 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
     elif run_env == 'gc':
         file_list = clip_audio_files
 
-    print(f"Processing files: total {len(file_list[:20])}")
-    for filename in file_list[:20]:
+    for filename in file_list:
         # Split the filename by underscore
         if run_env == "local":
             filename_parts = filename.split('_')
@@ -173,8 +181,8 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
-        resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
-        scaled_spectrogram = minmax_scaler(resized_spectrogram)
+        # resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
+        scaled_spectrogram = minmax_scaler(spectrogram)
         reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
 
         # Append the numpy array to the list
@@ -186,7 +194,6 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
 
     return spectrograms, labels, seconds, durations, podcast_names
 
-# ----------------- Functions to get the processed data from Big Query ----------------- #
 
 def get_bq_processed_data(output):
     if output:
@@ -199,57 +206,27 @@ def get_bq_processed_data(output):
             if row[3]:
                 duration_bq.append(row[3])
             if row[4]:
-
+                podcast_name_bq.append(row[4])
         return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
 
-# if __name__ == '__main__':
-#     #Running the function with podcasts and creating a separate folder for each podcast
-#     base_directory = 'raw_data/full_podcast' # Add the full audio file here
-#     output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
-#     # # Directory where you want to save all podcasts (This need to change for every person)
+if __name__ == '__main__':
+    base_directory = 'raw_data/new_podcast_ceo' # Add the full audio file here
+    output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
 
-#     # List of audio files with their ad times and podcast names for mp3/wav files:
-#     # 1: Audio name file with the extation
-#     # 2: Period in seconds where the ad starts and ends
-#     # 3: Output name: name podcast and episode
+    podcast_files_mp3_wav = [
+        (os.path.join(base_directory, "Glucose Goddess -  The Scary New Research On Sugar!.mp3"), [((60*60)+(16*60+30)), ((60*60)+(18*60+25)), ((60*60)+(38*60+20)), ((60*60)+(39*60+15))], "glucosegoddess"),
+        (os.path.join(base_directory, "Gabrielle Lyon - The Anti-Obesity Doctor,  If You Don't Exercise .mp3"), [60+35, 2*60+5, ((60*60)+(20*60+30)), ((60*60)+(22*60+25)), ((60*60)+(52*60+40)), ((60*60)+(53*60+35))], "gabriellelyon"),
+        (os.path.join(base_directory, "Eye Doctor - They’re Lying To You About Blue Light.mp3"), [((60*60)+(18*60+25)), ((60*60)+(20*60+15)), ((60*60)+(39*60+50)), ((60*60)+(40*60+55))], "eyedoctor"),
+        (os.path.join(base_directory, "Ramit Sethi - Never Split The Bill, It's A Red Flag & Renting Isn't Wasting Money.mp3"),	[((60*60)+(38*60+35)), ((60*60)+(40*60+20)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "ramitsethi"),
+        (os.path.join(base_directory, "Trevor Noah - My Depression Was Linked To ADHD.mp3"), [((120*60)+(17*60)), ((120*60)+(18*60+55)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "trevornoah"),
+        (os.path.join(base_directory, "Boris Johnson - They Were Looking at Engineering The Virus.mp3"), [((60*60)+(12*60+40)), ((60*60)+(14*60+40)), ((60*60)+(51*60+50)), ((60*60)+(52*60+45))], "borisjohnson"),
+    ]
 
-#     podcast_files_mp3_wav = [
-#         # (os.path.join(base_directory, "CEO181.mp3"), [0, 44, (9*60)+39, (11*60)+21], "ceo181"),
-#         # (os.path.join(base_directory, "OffMenu263.mp3"), [0,(60*2)+43,(3*60)+58, (4*60)+19, (33*60)+31, (35*60)+31,(54*60)+50, (56*60)+19,(77*60)+55, (78*60)+52, (79*60)+29, (80*60)+47], "offmenu263"),
-#         # (os.path.join(base_directory, "ParentingHell908.mp3"), [37, (60+15), (55*60)+36, (57*60)+4], "parentingHell908"),
-#         # (os.path.join(base_directory, "NSTAAF_Radioactivejenga.mp3"), [60+34,(60*2)+5,(60*17)+42,(20*60)+55,(48*60)+35,(50*60)+5,(58*60)+4,(59*60)+27], "nstaaf1"),
-#         # (os.path.join(base_directory, "When Bitter Becomes Sweet.mp3"), [32, (60+8)], "whenbitterbcamessweet"),
-#         # (os.path.join(base_directory, "What's Hidden in Your Words.mp3"), [(20*60+25), (21*60+10), (38*60+10), (38*60+37)], "whatishiddeninyourwordsEp01"),
-#         # (os.path.join(base_directory, "The Problem With Fancy Grocery Stores ft. Gwynedd Stuart.mp3"), [0, (60+58), (60*24+20), (60*26+52), (60*60+52), ((60*60)+(60*4+29)), ((60*60)+(60*23+3)), ((60*60)+(60*24+44))], "theproblemwithfancygrocerystoresftgwyneddstuartEp01"),
-#         # (os.path.join(base_directory, "Rabbit CEO Jesse Lyu is not thinking too far ahead.mp3"), [0, (2*60), (24*60+12), (26*60+50), (60*60+51), ((60*60)+(4*60+30)), ((60*60)+(23*60+3)), ((60*60)+(24*60+44))  ], "rabbitceojesselyuisnotthinkingtoofaradead"),
-#         # (os.path.join(base_directory, "Surviving a Hurricane.mp3"), [0, (2*60), (56*60), (56*60+32), ((60*60)+(60*8+29)), ((60*60)+(60*10+25)), ((60*60)+(60*40+24)), ((60*60)+(60*40+53))], "survivingahurricaneEp01"),
-#         # (os.path.join(base_directory, "Rupi Kaur Opens Up -I Felt Invisible- How To Transcend Trauma & Find Your Self-Worth.mp3"), [(60+21), (2*60+59), (22*60+20), (24*60), (43*60+50), (45*60), ((60*60)+(4*60+20)), ((60*60)+(5*60+30)), ((60*60)+(20*60+50)), ((60*60)+(22*60))], "rupikauropensupifetinvisible"),
-#         # (os.path.join(base_directory, "Quinta Brunson.mp3"), [0, 45, ((60*60)+(6*60+35)), ((60*60)+(7*60+45))], "quintabrunson"),
-#         # (os.path.join(base_directory, "Israel at War One Year On.mp3"), [0, (2*60+40), (58*60+18), (59*60+49)], "israelatwaroneyearon"),
-#         # (os.path.join(base_directory, "Guenther Steiner life on the other side of F1.mp3"), [(9*60+50), (11*60), (19*60), (20*60+30), (32*60), (33*60+15)], "guenthersteinerlifeontheothersideoff1"),
-#         # (os.path.join(base_directory, "Fat King & The Lying Jester.mp3"), [0, 60+5, (22*60+15), (24*60+45)], "farking&thelyingjester"),
-#         # (os.path.join(base_directory, "Election Special.mp3"), [0, 60,  (20*60+20), (21*60+50), (26*60+50), (28*60+20), (42*60+30), (48*60)], "electionspecial"),
-#         # (os.path.join(base_directory, "Drew Barrymore asks about boogers.mp3"), [0,  (2*60+15), (17*60+25), (19*60+12), (31*60+20), (32*60+30)], "drewbarrymoreasksaboutboogers"),
-#         # (os.path.join(base_directory, "Dreaming of Polar Night in Svalbard.mp3"), [0, 60+40], "dreamingofpolarnightinsvalbard"),
-#         # (os.path.join(base_directory, "Donald Trump Joins The Show!.mp3"), [(4*60+25), (5*60+30), (12*60+5), (13*60+5), (26*60+45), (27*60+55)], "donaldtrumpjoinstheshow"),
-#         # (os.path.join(base_directory, "Different Days.mp3"), [0, 60,  (40*60+20), (40*60+50), ((60*60)+(23*60+45)), ((60*60)+(24*60+18))], "differentdays"),
-#         # (os.path.join(base_directory, "Changes in the Big Apple.mp3"), [0, 30,  (15*60+50), (17*60+15), (22*60+30), (22*60+50), (35*60+10), (32*60+45)], "changesinthebigapple"),
-#         # (os.path.join(base_directory, "Bitcoin Mining Decentralization with the Datum Protocol at Ocean Mining.mp3"), [0, (60+25), (14*60+20), (18*60), (30*60+50), (33*60+45), (59*60+30), (60*60+2)], "bitcoinminingdecentralizationwiththedatumprotocolatoceanmining"),
-#         # (os.path.join(base_directory, "Billionaire Personality Disorder.mp3"), [0, 30, (23*60+20), (25*60+5), (60*60+50), (60*60+95), ((60*60)+(36*60+5)), ((60*60)+(37*60+45))], "billionairepersonalitydisorder"),
-#         # (os.path.join(base_directory, "Knowing who you are.mp3"), [0, 60, (49*60+25), (52*60+41), ((60*60)+(7*60+30)),  ((60*60)+(11*60+8))], "knowingwhoyouare"),
-#     ]
 
-#     # authentication with google cloud
-#     # google_client = auth_gc()
-#     # Loop through each file and process mp3:
-#     for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
-#         result = split_files(file_name, ad_list, podcast_name, output_directory, google_client)
+    # authentication with google cloud
+    google_client = auth_gc_storage()
+    # Loop through each file and process mp3:
+    for file_name, ad_list, podcast_name in podcast_files_mp3_wav:
+        result = split_files(file_name, ad_list, podcast_name, output_directory, google_client)
 
-#         print(f'Processing {podcast_name}: {result}')
-
-# # Data folder path: Change this to the path where your audio clips are stored
-# # folder_path = '../raw_data/5_sec_clips/drewbarrymoreasksaboutboogers' # Change this to the path where your audio clips are stored in the Google Colab environment
-# # all_spectrograms = get_features_model(folder_path) # Get the spectrograms and labels - THIS IS THE OUTPUT FOR OUR MODEL AND WE NEED TO ADD IR TO BIG QUERY !!
-
-# # # Output the number of spectrograms processed
-# # print(f"Processed {len(all_spectrograms[0])} spectrograms.")
+        print(f'Processing {podcast_name}: {result}')
