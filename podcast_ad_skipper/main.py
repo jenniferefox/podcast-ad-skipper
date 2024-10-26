@@ -1,10 +1,11 @@
 from podcast_ad_skipper.google_cloud import *
 from podcast_ad_skipper.model import *
-from podcast_ad_skipper.data_preparation import split_files, make_chunks
+from podcast_ad_skipper.data_preparation import split_files, make_chunks, get_bq_processed_data
 import pandas as pd
 import json
 from podcast_ad_skipper.google_cloud import auth_gc_storage, auth_gc_bigquery
 from podcast_ad_skipper.data_preparation import get_features_model
+from need_to_change_name import detect_ads, remove_ads_from_podcast
 
 def need_to_change(gcs_client):
     base_directory = 'raw_data/full_podcast' # Add the full audio file here
@@ -27,15 +28,11 @@ def need_to_change(gcs_client):
 # Main function, to be updated
 def get_processed_training_data(prefixes, table_name, chunk_size):
     '''Transform audio files into spectrogram'''
-
     file_count = 0
 
     storage_client = auth_gc_storage()
 
     bucket_name = BUCKET_NAME
-
-    # Do we need this?
-    # open_file = open_gcs_file(file_list[0])
 
     bq_client = auth_gc_bigquery()
 
@@ -46,9 +43,7 @@ def get_processed_training_data(prefixes, table_name, chunk_size):
     chunks_list = make_chunks(file_list, chunk_size)
 
     for chunk in chunks_list:
-
         features = get_features_model(chunk)
-
         rows_to_insert = [
                 {
                     "spectrogram": json.dumps(features[0][i].tolist()),
@@ -60,13 +55,23 @@ def get_processed_training_data(prefixes, table_name, chunk_size):
             ]
 
         insert_data_to_bq(rows_to_insert, bq_client, table_id, chunk_size)
-
         file_count += chunk_size
-
         print(f'Number of processed files: {file_count}')
 
     print('Done!!')
 
+
+def retrieve_files_from_bigquery(table_id):
+    bq_client = auth_gc_bigquery()
+    bigquery_object = get_output_query_bigquery(bq_client, table_id, limit=None, columns="*")
+    model_input_columns = get_bq_processed_data(bigquery_object)
+    return model_input_columns
+
+
+def change_name_to_processing_new_ads(podcast_file, model, clip_duration=5):
+    ad_segments = detect_ads(podcast_file, model, clip_duration)
+    clean_podcast = remove_ads_from_podcast(podcast_file, ad_segments)
+    return clean_podcast
 
 
 def train_plot_accuracy(X_train, y_train, X_test, y_test):
@@ -85,9 +90,11 @@ def train_plot_accuracy(X_train, y_train, X_test, y_test):
 
     return plot_history(history)
 
+
 if __name__ == "__main__":
-    prefixes=GCP_PREFIXES[:11]
+    prefixes=GCP_PREFIXES[11:]
     chunk_size=5
-    table_name='test8'
+    table_name='podcast-ad-skipper'
     for prefix in prefixes:
+        print(f'working on {prefix}')
         get_processed_training_data(prefix, table_name, chunk_size)
