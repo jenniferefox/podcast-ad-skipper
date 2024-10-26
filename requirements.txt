@@ -4,6 +4,7 @@ librosa
 pydub
 termcolor
 requests
+audiomentations
 
 # Some example packages
 pandas
