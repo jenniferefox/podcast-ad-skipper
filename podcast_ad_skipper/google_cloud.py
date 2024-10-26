@@ -155,7 +155,6 @@ def insert_data_to_bq(rows_to_insert, bq_client, table_id, data_chunks):
         print(f"Encountered errors while inserting rows: {errors}")
 
 
-
 def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
     """Given a string with columns and an table id, this function returns the result of
     the query with necessary columns. Also, give the option to limit the number of records to output
@@ -183,6 +182,29 @@ def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
 
     except Exception as e:
         print(colored(f"An error occurred: {e}", "red"))
+
+
+def count_files_in_gcs(prefixes):
+    '''Transform audio files into spectrogram'''
+
+    storage_client = auth_gc_storage()
+    bucket_name = BUCKET_NAME
+
+    for prefix in prefixes:
+
+        count = 0
+        file_list = []
+
+        bucket = storage_client.bucket(bucket_name)
+
+        file_list_google_object = bucket.list_blobs(prefix=prefix)
+
+        for file in file_list_google_object:
+            file_list.append(file)
+            count += 1
+
+        print(f'{prefix}: {count}')
+
 
 
 
