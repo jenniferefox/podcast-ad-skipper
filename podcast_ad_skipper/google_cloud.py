@@ -71,13 +71,12 @@ def upload_clips_gcs(client, bucket_name, filenames, blobname):
     if client is not None:
         bucket = client.bucket(bucket_name)
         d = bucket.blob(blobname)
-        job = d.upload_from_file(filenames, content_type="audio/wav")
-        result = job.result()
+        d.upload_from_file(filenames, content_type="audio/wav")
 
-    if isinstance(result, Exception):
-        print("Failed to upload {} due to exception: {}".format(blobname, result))
+    if d.exists():
+        print("Uploaded {blobname} to {bucket_name}")
     else:
-        print("Uploaded {} to {}.".format(blobname, bucket_name))
+        print("Failed to upload {blobname} to {bucket_name}")
 
 
 def retrieve_files_in_folder(storage_client, bucket_name, prefixes):
