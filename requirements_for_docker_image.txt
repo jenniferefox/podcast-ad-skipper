@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+numpy
+tensorflow
+google-cloud-storage
+google-auth
