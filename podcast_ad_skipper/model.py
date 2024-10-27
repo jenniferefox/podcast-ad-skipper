@@ -52,12 +52,12 @@ def fit_model(model, X_train, y_train, X_test, y_test):
 
 def build_trained_model(X_train, y_train, X_test, y_test):
     model = build_baseline_model(input_shape=(224,224,3), freeze_base=True)
-    trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
-    gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{trained_model}"
+    latest_trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
+    gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{latest_trained_model}"
     # Save the model directly to GCS
 
-    models.save_model(trained_model, gcs_uri)
-    return trained_model, history
+    models.save_model(latest_trained_model, gcs_uri)
+    return latest_trained_model, history
 
 
 def download_model_from_gcs(gcs_uri):
