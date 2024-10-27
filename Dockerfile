@@ -5,6 +5,7 @@ RUN pip install -r requirements.txt
 COPY podcast_ad_skipper podcast_ad_skipper
 COPY setup.py setup.py
 RUN pip install .
+RUN apt-get update && apt-get install -y ffmpeg
 ENV PORT=8000
 CMD uvicorn podcast_ad_skipper.fast_api:app --host 0.0.0.0 --port $PORT
 
