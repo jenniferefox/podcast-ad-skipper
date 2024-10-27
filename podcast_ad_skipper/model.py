@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
-# from keras.applications import VGG16
-# from keras import layers, models, Model
-# from keras.optimizers import Adam
-# import tensorflow as tf
+import tensorflow as tf
+from tensorflow import keras
+from keras import Model, Sequential, layers, regularizers, optimizers, applications, models
+from podcast_ad_skipper.params import *
+from podcast_ad_skipper.google_cloud import *
 
 def build_baseline_model(input_shape=(224,224,3), freeze_base=True):
-    base_model = tf.keras.applications.VGG16(
+    base_model = applications.VGG16(
         include_top=False,
         input_shape=input_shape,
         weights=None)
@@ -36,6 +37,44 @@ def build_baseline_model(input_shape=(224,224,3), freeze_base=True):
         metrics=['accuracy']
     )
     return model
+
+
+
+def fit_model(model, X_train, y_train, X_test, y_test):
+    history = model.fit(
+    X_train,
+    y_train,
+    batch_size=16,
+    epochs=2,
+    validation_data=(X_test,y_test))
+    return model, history
+
+
+def build_trained_model(X_train, y_train, X_test, y_test):
+    model = build_baseline_model(input_shape=(224,224,3), freeze_base=True)
+    trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
+    gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{trained_model}"
+    # Save the model directly to GCS
+
+    models.save_model(trained_model, gcs_uri)
+    return trained_model, history
+
+
+def download_model_from_gcs(gcs_uri):
+    client = auth_gc_storage()
+    blobs = list(client.get_bucket(BUCKET_NAME_MODEL).list_blobs())
+
+    try:
+        latest_trained_model = models.load_model(gcs_uri)
+        print("✅ Latest model downloaded from cloud storage")
+        return latest_trained_model
+
+    except:
+        print(f"\n❌ No model found in GCS bucket {BUCKET_NAME}")
+        return None
+
+
+
 
 def plot_history(history):
     loss = history.history['loss']
