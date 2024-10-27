@@ -6,15 +6,14 @@ import numpy as np
 import tensorflow as tf
 from keras import Model, Sequential, layers, regularizers, optimizers, applications, models
 from podcast_ad_skipper.params import *
-from podcast_ad_skipper.google_cloud import download_model_from_gcs
+from podcast_ad_skipper.main import download_model_from_gcs
 
 #Basic structure of API - not yet functioning
 
 app = FastAPI()
 
-gcs_uri = f"gs://{BUCKET_NAME_MODEL}/trained_model"
-
-
+# Download mod
+gcs_uri = f"gs://{BUCKET_NAME_MODEL}/latest_trained_model"
 app.state.model = download_model_from_gcs(gcs_uri)
 model = app.state.model
 
