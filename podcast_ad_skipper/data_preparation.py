@@ -201,13 +201,13 @@ def get_bq_processed_data(output):
         for row in output:
             spectrogram_bq.append(np.array(json.loads(row[0])))
             labels_bq.append(row[1])
-            if row[2]:
-                seconds_bq.append(row[2])
-            if row[3]:
-                duration_bq.append(row[3])
-            if row[4]:
-                podcast_name_bq.append(row[4])
-        return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
+            # if row[2]:
+            #     seconds_bq.append(row[2])
+            # if row[3]:
+            #     duration_bq.append(row[3])
+            # if row[4]:
+            #     podcast_name_bq.append(row[4])
+        return spectrogram_bq, labels_bq #, seconds_bq, duration_bq, podcast_name_bq
 
 if __name__ == '__main__':
     base_directory = 'raw_data/new_podcast_ceo' # Add the full audio file here

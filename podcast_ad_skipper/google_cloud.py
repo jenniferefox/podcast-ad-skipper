@@ -160,8 +160,18 @@ def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
     """
     try:
         if limit is None:
-            query = f"""SELECT {columns}
-                        from {table_id}"""
+            # query = f"""SELECT {columns}
+            #             from {table_id}"""
+            query = f"""with no_ad as(SELECT distinct spectrogram, labels
+                        FROM {table_id}
+                        where labels = 0
+                        limit 10000)
+                        select * from no_ad
+                        union all
+                        SELECT distinct spectrogram, labels
+                        FROM {table_id}
+                        where labels = 1
+                        """
         else:
             query = f"""SELECT {columns}
                     from {table_id}
