@@ -214,12 +214,12 @@ if __name__ == '__main__':
     output_directory = 'raw_data/5_sec_clips' # Temporally store for the 5 sec clips -> Google Cloud
 
     podcast_files_mp3_wav = [
-        (os.path.join(base_directory, "Glucose Goddess -  The Scary New Research On Sugar!.mp3"), [((60*60)+(16*60+30)), ((60*60)+(18*60+25)), ((60*60)+(38*60+20)), ((60*60)+(39*60+15))], "glucosegoddess"),
-        (os.path.join(base_directory, "Gabrielle Lyon - The Anti-Obesity Doctor,  If You Don't Exercise .mp3"), [60+35, 2*60+5, ((60*60)+(20*60+30)), ((60*60)+(22*60+25)), ((60*60)+(52*60+40)), ((60*60)+(53*60+35))], "gabriellelyon"),
-        (os.path.join(base_directory, "Eye Doctor - They’re Lying To You About Blue Light.mp3"), [((60*60)+(18*60+25)), ((60*60)+(20*60+15)), ((60*60)+(39*60+50)), ((60*60)+(40*60+55))], "eyedoctor"),
-        (os.path.join(base_directory, "Ramit Sethi - Never Split The Bill, It's A Red Flag & Renting Isn't Wasting Money.mp3"),	[((60*60)+(38*60+35)), ((60*60)+(40*60+20)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "ramitsethi"),
-        (os.path.join(base_directory, "Trevor Noah - My Depression Was Linked To ADHD.mp3"), [((120*60)+(17*60)), ((120*60)+(18*60+55)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "trevornoah"),
-        (os.path.join(base_directory, "Boris Johnson - They Were Looking at Engineering The Virus.mp3"), [((60*60)+(12*60+40)), ((60*60)+(14*60+40)), ((60*60)+(51*60+50)), ((60*60)+(52*60+45))], "borisjohnson"),
+        # (os.path.join(base_directory, "Glucose Goddess -  The Scary New Research On Sugar!.mp3"), [((60*60)+(16*60+30)), ((60*60)+(18*60+25)), ((60*60)+(38*60+20)), ((60*60)+(39*60+15))], "glucosegoddess"),
+        # (os.path.join(base_directory, "Gabrielle Lyon - The Anti-Obesity Doctor,  If You Don't Exercise .mp3"), [60+35, 2*60+5, ((60*60)+(20*60+30)), ((60*60)+(22*60+25)), ((60*60)+(52*60+40)), ((60*60)+(53*60+35))], "gabriellelyon"),
+        # (os.path.join(base_directory, "Eye Doctor - They’re Lying To You About Blue Light.mp3"), [((60*60)+(18*60+25)), ((60*60)+(20*60+15)), ((60*60)+(39*60+50)), ((60*60)+(40*60+55))], "eyedoctor"),
+        # (os.path.join(base_directory, "Ramit Sethi - Never Split The Bill, It's A Red Flag & Renting Isn't Wasting Money.mp3"),	[((60*60)+(38*60+35)), ((60*60)+(40*60+20)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "ramitsethi"),
+        # (os.path.join(base_directory, "Trevor Noah - My Depression Was Linked To ADHD.mp3"), [((120*60)+(17*60)), ((120*60)+(18*60+55)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "trevornoah"),
+        # (os.path.join(base_directory, "Boris Johnson - They Were Looking at Engineering The Virus.mp3"), [((60*60)+(12*60+40)), ((60*60)+(14*60+40)), ((60*60)+(51*60+50)), ((60*60)+(52*60+45))], "borisjohnson"),
     ]
 
 

@@ -7,6 +7,7 @@ GCP_REGION = os.environ.get("GCP_REGION")
 GOOGLE_CLOUD_SERVICE_ACCOUNT = os.environ.get("GOOGLE_CLOUD_SERVICE_ACCOUNT")
 # Compute Engine
 INSTANCE = os.environ.get("INSTANCE")
+INSTANCE_NAME_PRO=os.environ.get("INSTANCE_NAME_PRO")
 
 # BigQuery
 BQ_REGION = os.environ.get("BQ_REGION")
