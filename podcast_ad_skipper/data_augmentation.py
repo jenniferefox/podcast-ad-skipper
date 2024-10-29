@@ -30,10 +30,14 @@ def augment_audiodata_by_4(list_of_spectrogram_files, sr=16000):
         AddGaussianNoise(min_amplitude=0.001, max_amplitude=0.015, p=0.5),
         PitchShift(min_semitones=-4, max_semitones=4, p=0.5),
         ])
+    
+    new_files = []
 
     for file in list_of_spectrogram_files:
         timemask_spectrogram = augment_timemask(samples=file,sample_rate=sr)
         frequencymask_spectrogram = augment_frequencymask(file)
         noise_pitch_timemask_spectrogram = augment_noise_pitch_timemask(samples=file, sample_rate=sr)
         noise_pitch_frequencymask_spectrogram = augment_frequencymask(augment_noise_pitch_frequencymask(samples=file, sample_rate=sr))
-        np.array(timemask_spectrogram, frequencymask_spectrogram, noise_pitch_timemask_spectrogram, noise_pitch_frequencymask_spectrogram)
+        new_files.append(np.array(timemask_spectrogram, frequencymask_spectrogram, noise_pitch_timemask_spectrogram, noise_pitch_frequencymask_spectrogram))
+
+    return new_files
