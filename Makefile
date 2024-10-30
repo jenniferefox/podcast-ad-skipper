@@ -8,7 +8,7 @@ pytest:
 	PYTHONDONTWRITEBYTECODE=1 pytest -v --color=yes
 
 split_clip:
-	@python podcast-ad-skipper/podcast_to_5_sec_clips.py
+	@python podcast_ad_skipper/split_clips.py
 
 get_fuatures_model:
 	@python podcast-ad-skipper/data_preparation.py
