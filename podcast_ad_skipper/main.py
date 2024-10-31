@@ -5,7 +5,7 @@ import pandas as pd
 import json
 from podcast_ad_skipper.google_cloud import auth_gc_storage, auth_gc_bigquery
 from podcast_ad_skipper.data_preparation import get_features_model
-from need_to_change_name import detect_ads, remove_ads_from_podcast
+from podcast_ad_skipper.leo_code_change_name import detect_ads, remove_ads_from_podcast
 
 def need_to_change(gcs_client):
     base_directory = 'raw_data/full_podcast' # Add the full audio file here
