@@ -10,6 +10,7 @@ from scipy.ndimage import zoom
 from podcast_ad_skipper.google_cloud import *
 from podcast_ad_skipper.params import *
 
+CORRECT_SPECTROGRAM_SHAPE = (128, 216)
 # ----------------- Function to split the audio files ----------------- #
 
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
@@ -125,7 +126,7 @@ def create_spectrogram(audio_file_wav, sr=None):
 
 # ----------------- Functions to get the features for the model ----------------- #
 
-def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
+def get_features_model(clip_audio_files, run_env="gc"):
     """
     Creates spectrograms and converts into np arrays.
     """
@@ -165,7 +166,7 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
 
         spectrogram = create_spectrogram(file_path)
 
-        if spectrogram.shape == (128, 216):
+        if spectrogram.shape == CORRECT_SPECTROGRAM_SHAPE:
 
             # Append the numpy array to the list
             spectrograms.append(spectrogram)
@@ -192,6 +193,8 @@ def get_bq_processed_data(output):
             if row[4]:
                 podcast_name_bq.append(row[4])
         return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
+
+
 
 if __name__ == '__main__':
     base_directory = 'raw_data/new_podcast_ceo' # Add the full audio file here
