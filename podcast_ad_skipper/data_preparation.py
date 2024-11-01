@@ -165,12 +165,14 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
 
         spectrogram = create_spectrogram(file_path)
 
-        # Append the numpy array to the list
-        spectrograms.append(spectrogram)
-        labels.append(is_ad)
-        seconds.append(start_time)
-        durations.append(duration)
-        podcast_names.append(podcast_name)
+        if spectrogram.shape == (128, 216):
+
+            # Append the numpy array to the list
+            spectrograms.append(spectrogram)
+            labels.append(is_ad)
+            seconds.append(start_time)
+            durations.append(duration)
+            podcast_names.append(podcast_name)
 
     return spectrograms, labels, seconds, durations, podcast_names
 
