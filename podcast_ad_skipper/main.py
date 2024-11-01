@@ -92,9 +92,9 @@ def train_plot_accuracy(X_train, y_train, X_test, y_test):
 
 
 if __name__ == "__main__":
-    prefixes=GCP_PREFIXES[11:]
+    prefixes=GCP_PREFIXES[:11]
     chunk_size=5
-    table_name='podcast-ad-skipper'
+    table_name='processed_train_data_II'
     for prefix in prefixes:
         print(f'working on {prefix}')
         get_processed_training_data(prefix, table_name, chunk_size)
