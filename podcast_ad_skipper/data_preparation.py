@@ -174,6 +174,9 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
             durations.append(duration)
             podcast_names.append(podcast_name)
 
+        else:
+            print(f'{filename_parts} is not correct shape')
+
     return spectrograms, labels, seconds, durations, podcast_names
 
 def get_bq_processed_data(output):
