@@ -105,22 +105,36 @@ def make_chunks(file_list, chunk_size):
     return data_chunks
 
 
-def create_spectrogram(audio_file_wav, sr=16000):
-    """
-    Converts wav files to spectrograms.
-    """
+# def create_spectrogram(audio_file_wav, sr=16000):
+#     """
+#     Converts wav files to spectrograms.
+#     """
 
-    #data: is an array representing the amplitude of the audio signal at each sample.
-    #sample_rate: is the sampling rate (samples per second)
-    data, sample_rate = librosa.load(audio_file_wav, sr=sr) # sr=None to keep the original sample rate (we can change this if needed)
-    spectrogram = librosa.feature.melspectrogram(
-        y=data,
+#     #data: is an array representing the amplitude of the audio signal at each sample.
+#     #sample_rate: is the sampling rate (samples per second)
+#     data, sample_rate = librosa.load(audio_file_wav, sr=sr) # sr=None to keep the original sample rate (we can change this if needed)
+#     spectrogram = librosa.feature.melspectrogram(
+#         y=data,
+#         sr=sr,
+#         n_mels=128,  # Number of mel bands
+#         fmax=8000    # Maximum frequency
+#     )
+#     # Short-time Fourier transform
+#     return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
+
+
+def create_spectrogram(wav_path, sr=None):
+
+    y, sr = librosa.load(wav_path)
+    # Create mel spectrogram
+    mel_spect = librosa.feature.melspectrogram(
+        y=y,
         sr=sr,
         n_mels=128,  # Number of mel bands
         fmax=8000    # Maximum frequency
     )
-    # Short-time Fourier transform
-    return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
+    # Convert to log scale and return
+    return np.array(librosa.power_to_db(mel_spect, ref=np.max))
 
 # ----------------- Functions to process the spectrograms ----------------- #
 
@@ -181,12 +195,12 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
-        # resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
-        scaled_spectrogram = minmax_scaler(spectrogram)
-        reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
+        # # resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
+        # scaled_spectrogram = minmax_scaler(spectrogram)
+        # reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
 
         # Append the numpy array to the list
-        spectrograms.append(reshaped_spectrogram)
+        spectrograms.append(spectrogram)
         labels.append(is_ad)
         seconds.append(start_time)
         durations.append(duration)
