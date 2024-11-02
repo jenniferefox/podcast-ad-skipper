@@ -106,7 +106,7 @@ def make_chunks(file_list, chunk_size):
     return data_chunks
 
 
-def create_spectrogram(audio_file_wav, sr=None):
+def create_spectrogram(audio_file_wav, sr=22050):
     """
     Converts wav files to spectrograms.
     sr=None to keep the original sample rate
