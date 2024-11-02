@@ -6,16 +6,16 @@ from podcast_ad_skipper.params import *
 from podcast_ad_skipper.google_cloud import *
 import numpy as np
 from sklearn.model_selection import train_test_split
-
+from data_preparation import get_bq_processed_data
 
 INPUT_SHAPE = (128, 216, 1)
 
-def prep_data_for_model(all_spectrograms, labels, seconds, duration):
+def prep_data_for_model(all_spectrograms, labels):
 
     X = np.expand_dims(np.array(all_spectrograms), axis=-1)
     y = np.array(labels)
     #Feature to calculate progress
-    X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
+    # X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
 
     X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -24,7 +24,7 @@ def prep_data_for_model(all_spectrograms, labels, seconds, duration):
     random_state=42,
     stratify=y,  # This ensures similar class distribution in train/test splits
     )
-    return X_train, X_test, y_train, y_test, X_timing
+    return X_train, X_test, y_train, y_test
 
 def build_baseline_model(input_shape=(128,216,1)):
     model = tf.keras.models.Sequential([
@@ -127,3 +127,24 @@ def evaluate_model(model, X_test, y_test):
 
 def predict(model, X_predict):
     return model.predict(X_predict)
+
+if __name__ == "__main__":
+    bq_client = auth_gc_bigquery()
+    print('Auth bigquery')
+
+    table_id = f"{GCP_PROJECT_ID}.Numpy_Arrays_Dataset.processed_train_data_II"
+    print('table ID')
+    output= get_output_query_bigquery(bq_client, table_id, custom="Leo")
+    print('bq output')
+    processed_output = get_bq_processed_data(output)
+    print('process bq output')
+
+    spectrogram_np = np.array(processed_output[0])
+    labels_np = np.array(processed_output[1])
+    print(spectrogram_np.shape)
+    print(labels_np.shape)
+
+    X_train, y_train, X_test, y_test = prep_data_for_model(spectrogram_np, labels_np)
+    print('X and y split')
+    build_trained_model(X_train, y_train, X_test, y_test)
+    print('trained model built')

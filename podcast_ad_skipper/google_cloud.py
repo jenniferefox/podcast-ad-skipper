@@ -166,7 +166,7 @@ def get_output_query_bigquery(bq_client, table_id, custom=None, limit=None, colu
                             FROM {table_id}
                             WHERE labels = 1),
                         no_ads as (SELECT spectrogram, labels  FROM {table_id}
-                        WHERE labels = 0 Limit 1500)
+                        WHERE labels = 0 Limit 2934)
 
                         select * from ads
                         union all
