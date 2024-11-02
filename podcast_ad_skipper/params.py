@@ -18,7 +18,7 @@ BQ_TABLE = os.environ.get("BQ_TABLE")
 GAR_IMAGE = os.environ.get("GAR_IMAGE")
 IMAGE_ID = os.environ.get("IMAGE_ID")
 IMAGE_TAB = os.environ.get("IMAGE_TAB")
-
+SERVICE_URL= os.environ.get("SERVICE_URL")
 
 GCP_PREFIXES = [
     "billionairepersonalitydisorder",

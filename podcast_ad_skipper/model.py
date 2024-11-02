@@ -5,53 +5,52 @@ from keras import Model, Sequential, layers, regularizers, optimizers, applicati
 from podcast_ad_skipper.params import *
 from podcast_ad_skipper.google_cloud import *
 
-def build_baseline_model(input_shape=(224,224,3), freeze_base=True):
-    base_model = applications.VGG16(
-        include_top=False,
-        input_shape=input_shape,
-        weights=None)
-    base_model.trainable = freeze_base
-    x = base_model.output
+INPUT_SHAPE = (128, 216, 1)
 
-    #flatten
-    x = layers.Flatten()(x)
+def build_baseline_model(input_shape=(128,216,1)):
+    model = tf.keras.models.Sequential([
+    # Input layer - note that Input() doesn't take an activation
+    tf.keras.layers.Input(shape=input_shape),
 
-    #dense layer for ad detection
-    x = layers.Dense(512, activation='relu')(x)
-    x = layers.Dropout(0.5)(x)
+    # Conv2D layer
+    tf.keras.layers.Conv2D(32, 3, strides=2, padding='same', activation='relu'),
 
-    #output layer for ad detection
-    output = layers.Dense(1, activation='sigmoid')(x)
-    loss = 'binary_crossentropy'
+    # Flatten layer
+    tf.keras.layers.Flatten(),
 
-    #create
-    model = models.Model(
-        inputs=base_model.input,
-        outputs=output
-    )
+    # Dense layers
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
 
-    #compile
+    # Compile model
     model.compile(
-        loss=loss,
+        loss='binary_crossentropy',
         optimizer='adam',
         metrics=['accuracy']
     )
+
     return model
 
 
 
 def fit_model(model, X_train, y_train, X_test, y_test):
+
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
+
     history = model.fit(
     X_train,
     y_train,
     batch_size=16,
-    epochs=2,
-    validation_data=(X_test,y_test))
+    epochs=50,
+    validation_data=(X_test,y_test),
+    callbacks=[early_stopping,])
     return model, history
 
 
 def build_trained_model(X_train, y_train, X_test, y_test):
-    model = build_baseline_model(input_shape=(224,224,3), freeze_base=True)
+    model = build_baseline_model(input_shape=INPUT_SHAPE)
     latest_trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
     gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{latest_trained_model}"
     # Save the model directly to GCS
@@ -72,9 +71,6 @@ def download_model_from_gcs(gcs_uri):
     except:
         print(f"\n❌ No model found in GCS bucket {BUCKET_NAME}")
         return None
-
-
-
 
 def plot_history(history):
     loss = history.history['loss']
@@ -104,3 +100,8 @@ def plot_history(history):
     plt.legend()
 
     plt.show()
+
+def evaluate_model(model, X_test, y_test):
+    final_loss, final_acc = model.evaluate(X_test, y_test, verbose=0)
+    print("Final loss: {0:.6f}, final accuracy: {1:.6f}".format(final_loss, final_acc))
+    return final_loss, final_acc

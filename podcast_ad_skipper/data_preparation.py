@@ -10,6 +10,7 @@ from scipy.ndimage import zoom
 from podcast_ad_skipper.google_cloud import *
 from podcast_ad_skipper.params import *
 
+CORRECT_SPECTROGRAM_SHAPE = (128, 216)
 # ----------------- Function to split the audio files ----------------- #
 
 def split_files(original_file, ad_list, podcast_name, output_directory, google_client, run_env="gc"):
@@ -105,61 +106,29 @@ def make_chunks(file_list, chunk_size):
     return data_chunks
 
 
-# def create_spectrogram(audio_file_wav, sr=16000):
-#     """
-#     Converts wav files to spectrograms.
-#     """
+def create_spectrogram(audio_file_wav, sr=22050):
+    """
+    Converts wav files to spectrograms.
+    sr=None to keep the original sample rate
+    """
 
-#     #data: is an array representing the amplitude of the audio signal at each sample.
-#     #sample_rate: is the sampling rate (samples per second)
-#     data, sample_rate = librosa.load(audio_file_wav, sr=sr) # sr=None to keep the original sample rate (we can change this if needed)
-#     spectrogram = librosa.feature.melspectrogram(
-#         y=data,
-#         sr=sr,
-#         n_mels=128,  # Number of mel bands
-#         fmax=8000    # Maximum frequency
-#     )
-#     # Short-time Fourier transform
-#     return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
-
-
-def create_spectrogram(wav_path, sr=None):
-
-    y, sr = librosa.load(wav_path)
-    # Create mel spectrogram
-    mel_spect = librosa.feature.melspectrogram(
-        y=y,
-        sr=sr,
+    #data: is an array representing the amplitude of the audio signal at each sample.
+    #sample_rate: is the sampling rate (samples per second)
+    data, sample_rate = librosa.load(audio_file_wav, sr=sr)
+    spectrogram = librosa.feature.melspectrogram(
+        y=data,
+        sr=sample_rate,
         n_mels=128,  # Number of mel bands
         fmax=8000    # Maximum frequency
     )
     # Convert to log scale and return
-    return np.array(librosa.power_to_db(mel_spect, ref=np.max))
-
-# ----------------- Functions to process the spectrograms ----------------- #
-
-def resize_spectrogram(spectrogram, output_size):
-    sp_row, sp_col = spectrogram.shape
-    out_row, out_col = output_size
-    resized_spec = zoom(spectrogram, (out_row/sp_row, out_col/sp_col))
-    return resized_spec
-
-def minmax_scaler(spectrogram):
-    min_val = np.min(spectrogram)
-    max_val = np.max(spectrogram)
-
-    normalised_spectrogram = (spectrogram - min_val) / (max_val - min_val)
-
-    return normalised_spectrogram
-
-def reshape_spectrogram(spectrogram):
-    return np.stack((spectrogram, spectrogram, spectrogram), axis=2)
+    return np.array(librosa.power_to_db(spectrogram, ref=np.max))
 
 # ----------------- Functions to get the features for the model ----------------- #
 
-def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
+def get_features_model(clip_audio_files, run_env="gc"):
     """
-    Converts spectrograms into np arrays.
+    Creates spectrograms and converts into np arrays.
     """
     spectrograms = [] # This will store the spectrograms of each clip
     labels = []  # This will store the labels of each clip
@@ -189,39 +158,39 @@ def get_features_model(clip_audio_files, run_env="gc", array_shape=(224,224)):
         duration = int(filename_parts[2])  # Third part is the total duration of the podcast
          # Extract the podcast name (four part of the filename)
         podcast_name = filename_parts[3].replace('.wav', '')  # Third part is the total duration of the podcast
+
         if run_env == "local":
             file_path = os.path.join(clip_audio_files, filename)
         elif run_env == 'gc':
             file_path = filename.open('rb')
 
         spectrogram = create_spectrogram(file_path)
-        # # resized_spectrogram =resize_spectrogram(spectrogram, array_shape)
-        # scaled_spectrogram = minmax_scaler(spectrogram)
-        # reshaped_spectrogram = reshape_spectrogram(scaled_spectrogram)
 
-        # Append the numpy array to the list
-        spectrograms.append(spectrogram)
-        labels.append(is_ad)
-        seconds.append(start_time)
-        durations.append(duration)
-        podcast_names.append(podcast_name)
+        if spectrogram.shape == CORRECT_SPECTROGRAM_SHAPE:
+
+            # Append the numpy array to the list
+            spectrograms.append(spectrogram)
+            labels.append(is_ad)
+            seconds.append(start_time)
+            durations.append(duration)
+            podcast_names.append(podcast_name)
+
+        else:
+            print(f'{filename_parts} is not correct shape. Instead shape is {spectrogram.shape}')
 
     return spectrograms, labels, seconds, durations, podcast_names
 
-
 def get_bq_processed_data(output):
     if output:
-        spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq = [], [], [], [], []
+        spectrogram_bq, labels_bq = [], []
         for row in output:
-            spectrogram_bq.append(np.array(json.loads(row[0])))
-            labels_bq.append(row[1])
-            if row[2]:
-                seconds_bq.append(row[2])
-            if row[3]:
-                duration_bq.append(row[3])
-            if row[4]:
-                podcast_name_bq.append(row[4])
-        return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
+            # Use row.field_name to access fields instead of indices
+            spectrogram_bq.append(np.array(json.loads(row['spectrogram'])))
+            labels_bq.append(row['labels'])
+        return spectrogram_bq, labels_bq
+
+
+
 
 if __name__ == '__main__':
     base_directory = 'raw_data/new_podcast_ceo' # Add the full audio file here
