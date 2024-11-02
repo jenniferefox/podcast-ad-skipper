@@ -44,4 +44,11 @@ GCP_PREFIXES = [
     "theproblemwithfancygrocerystoresftgwyneddstuartEp01",
     "whatishiddeninyourwordsEp01",
     "whenbitterbcamessweet",
+    # ----- Leo new podcasts -----
+    "glucosegoddess",
+    "gabriellelyon",
+    "eyedoctor",
+    "ramitsethi",
+    "trevornoah",
+    "borisjohnson"
 ]
