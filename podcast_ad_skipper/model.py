@@ -144,7 +144,7 @@ if __name__ == "__main__":
     print(spectrogram_np.shape)
     print(labels_np.shape)
 
-    X_train, y_train, X_test, y_test = prep_data_for_model(spectrogram_np, labels_np)
+    X_train, X_test, y_train, y_test = prep_data_for_model(spectrogram_np, labels_np)
     print('X and y split')
-    build_trained_model(X_train, y_train, X_test, y_test)
+    build_trained_model(X_train, X_test, y_train, y_test)
     print('trained model built')
