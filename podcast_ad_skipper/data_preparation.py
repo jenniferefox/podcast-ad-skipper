@@ -176,23 +176,21 @@ def get_features_model(clip_audio_files, run_env="gc"):
             podcast_names.append(podcast_name)
 
         else:
-            print(f'{filename_parts} is not correct shape')
+            print(f'{filename_parts} is not correct shape. Instead shape is {spectrogram.shape}')
 
     return spectrograms, labels, seconds, durations, podcast_names
 
 def get_bq_processed_data(output):
     if output:
-        spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq = [], [], [], [], []
+        spectrogram_bq, labels_bq = [], []
         for row in output:
-            spectrogram_bq.append(np.array(json.loads(row[0])))
-            labels_bq.append(row[1])
-            if row[2]:
-                seconds_bq.append(row[2])
-            if row[3]:
-                duration_bq.append(row[3])
-            if row[4]:
-                podcast_name_bq.append(row[4])
-        return spectrogram_bq, labels_bq, seconds_bq, duration_bq, podcast_name_bq
+            # Use row.field_name to access fields instead of indices
+            spectrogram_bq.append(np.array(json.loads(row['spectrogram'])))
+            labels_bq.append(row['labels'])
+        return spectrogram_bq, labels_bq
+
+
+
 
 
 

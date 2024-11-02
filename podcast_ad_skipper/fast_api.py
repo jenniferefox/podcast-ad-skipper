@@ -6,25 +6,24 @@ import numpy as np
 import tensorflow as tf
 from keras import Model, Sequential, layers, regularizers, optimizers, applications, models
 from podcast_ad_skipper.params import *
-from podcast_ad_skipper.main import download_model_from_gcs
 
 #Basic structure of API - not yet functioning
 
 app = FastAPI()
 
 # Download mod
-gcs_uri = f"gs://{BUCKET_NAME_MODEL}/latest_trained_model"
+gcs_uri = f"gs://{BUCKET_NAME_MODEL}/latest_trained_model.h5"
 app.state.model = download_model_from_gcs(gcs_uri)
-model = app.state.model
+
 
 @app.get("/predict")
-def predict(spectrogram: np.ndarray, model):
-# FROM CODE IN FRONT END
+def predict(spectrogram):
     model = app.state.model
-    X_pred_preprocessed = None
-    prediction = model.predict(X_pred_preprocessed)
+    prediction = model.predict(spectrogram)
     return prediction
-
+    # return {
+    # 'greeting': 'Hello predict'
+    # }
 
 @app.get("/")
 def root():
