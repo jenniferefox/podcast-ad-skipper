@@ -4,8 +4,27 @@ from tensorflow import keras
 from keras import Model, Sequential, layers, regularizers, optimizers, applications, models
 from podcast_ad_skipper.params import *
 from podcast_ad_skipper.google_cloud import *
+import numpy as np
+from sklearn.model_selection import train_test_split
+
 
 INPUT_SHAPE = (128, 216, 1)
+
+def prep_data_for_model(all_spectrograms, labels, seconds, duration):
+
+    X = np.expand_dims(np.array(all_spectrograms), axis=-1)
+    y = np.array(labels)
+    #Feature to calculate progress
+    X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
+
+    X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y,  # This ensures similar class distribution in train/test splits
+    )
+    return X_train, X_test, y_train, y_test, X_timing
 
 def build_baseline_model(input_shape=(128,216,1)):
     model = tf.keras.models.Sequential([
@@ -105,3 +124,6 @@ def evaluate_model(model, X_test, y_test):
     final_loss, final_acc = model.evaluate(X_test, y_test, verbose=0)
     print("Final loss: {0:.6f}, final accuracy: {1:.6f}".format(final_loss, final_acc))
     return final_loss, final_acc
+
+def predict(model, X_predict):
+    return model.predict(X_predict)
