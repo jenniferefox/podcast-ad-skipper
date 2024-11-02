@@ -161,16 +161,25 @@ def get_output_query_bigquery(bq_client, table_id, custom=None, limit=None, colu
     try:
         # Define the query: WE NEED TO CHANGE THIS TO A CUSTOM QUERY AND THE LIMIT TO A CUSTOM LIMIT
         if custom is not None:
-            query = f"""with ads as (
-                            SELECT spectrogram, labels
-                            FROM {table_id}
-                            WHERE labels = 1),
-                        no_ads as (SELECT spectrogram, labels  FROM {table_id}
-                        WHERE labels = 0 Limit 2934)
+            query = f"""
+            WITH ads AS (
+            SELECT spectrogram, labels
+            FROM `podcast-ad-skipper.Numpy_Arrays_Dataset.processed_train_data_II`
+            WHERE labels = 1
+            ),
+            no_ads AS (
+                SELECT spectrogram, labels
+                FROM `podcast-ad-skipper.Numpy_Arrays_Dataset.processed_train_data_II`
+                WHERE labels = 0
+                AND MOD(FARM_FINGERPRINT(CAST(spectrogram AS STRING)), 100) < 1  -- Adjust percentage if needed
+                LIMIT 2934
+            )
 
-                        select * from ads
-                        union all
-                        select * from no_ads"""
+            SELECT * FROM ads
+            UNION ALL
+            SELECT * FROM no_ads
+
+                    """
         elif limit is None:
             query = f"""SELECT {columns}
                         from {table_id}"""
