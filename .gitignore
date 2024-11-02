@@ -1,6 +1,6 @@
 .env
 .envrc
-
+.env.yaml
 raw_data/
 gcp/
 .DS_Store
