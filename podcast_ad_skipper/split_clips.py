@@ -109,6 +109,18 @@ if __name__ == '__main__':
         # (os.path.join(base_directory, "Trevor Noah - My Depression Was Linked To ADHD.mp3"), [((120*60)+(17*60)), ((120*60)+(18*60+55)), ((60*60)+(48*60+15)), ((60*60)+(49*60+10))], "trevornoah"),
         # (os.path.join(base_directory, "Boris Johnson - They Were Looking at Engineering The Virus.mp3"), [((60*60)+(12*60+40)), ((60*60)+(14*60+40)), ((60*60)+(51*60+50)), ((60*60)+(52*60+45))], "borisjohnson"),
         (os.path.join(base_directory, "spirithalloween.mp3"), [0,30, ((22*60)+51), ((23*60)+53),((33*60)+49), ((34*60)+50)], "spirit_halloween"),
+        (os.path.join(base_directory, "infernal_machine.mp3"), [0,50, ((15*60)+50), ((16*60)+21),((30*60)+18), ((30*60)+49)], "infernal_machine"),
+        (os.path.join(base_directory, "world_out.mp3"), [0,30, ((14*60)+16), ((14*60)+48), ((34*60)+36), ((35*60)+8)], "world_out"),
+        (os.path.join(base_directory, "medellin_revisited.mp3"), [0,30, ((14*60)+16), ((14*60)+48), ((34*60)+36), ((35*60)+8)], "medellin_revisited"),
+        (os.path.join(base_directory, "planetmoney.mp3"), [0,30, ((22*60)+13), ((22*60)+44)], "planetmoney"),
+        (os.path.join(base_directory, "christiania.mp3"), [((18*60)+29), ((19*60)+20)], "christiania"),
+        (os.path.join(base_directory, "not_built_for_this_6.mp3"), [0, 30, ((16*60)+8), ((16*60)+59)], "not_built_for_this_6"),
+        (os.path.join(base_directory, "not_built_for_this_4.mp3"), [0, 30, ((22*60)+21), ((23*60)+15), ((49*60)+41), ((50*60)+12)], "not_built_for_this_4"),
+        (os.path.join(base_directory, "not_built_for_this_3.mp3"), [((16*60)+16), ((17*60)+9)], "not_built_for_this_3"),
+        (os.path.join(base_directory, "not_built_for_this_2.mp3"), [((22*60)+28), ((23*60)+20)], "not_built_for_this_2"),
+        (os.path.join(base_directory, "not_built_for_this_2.mp3"), [((22*60)+28), ((23*60)+20)], "not_built_for_this_2"),
+        (os.path.join(base_directory, "outrageous_fortune.mp3"), [((21*60)+59), ((22*60)+52)], "outrageous_fortune"),
+        (os.path.join(base_directory, "olympics.mp3"), [0, 30, ((22*60)+28), ((23*60)+21)], "olympics")
 
     ]
 

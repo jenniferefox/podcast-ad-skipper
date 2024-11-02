@@ -121,8 +121,8 @@ def create_spectrogram(audio_file_wav, sr=22050):
         n_mels=128,  # Number of mel bands
         fmax=8000    # Maximum frequency
     )
-    # Convert to log scale and return
-    return np.array(librosa.power_to_db(spectrogram, ref=np.max))
+    # Short-time Fourier transform
+    return np.array(librosa.power_to_db(spectrogram, ref=np.max))  # Convert to decibel scale
 
 # ----------------- Functions to get the features for the model ----------------- #
 
@@ -188,6 +188,8 @@ def get_bq_processed_data(output):
             spectrogram_bq.append(np.array(json.loads(row['spectrogram'])))
             labels_bq.append(row['labels'])
         return spectrogram_bq, labels_bq
+
+
 
 
 
