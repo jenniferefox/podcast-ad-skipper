@@ -6,7 +6,7 @@ from podcast_ad_skipper.params import *
 from podcast_ad_skipper.google_cloud import *
 import numpy as np
 from sklearn.model_selection import train_test_split
-
+from data_preparation import get_bq_processed_data
 
 INPUT_SHAPE = (128, 216, 1)
 
@@ -14,8 +14,10 @@ def prep_data_for_model(spectrograms, labels, seconds=None, duration=None):
 
     X = np.expand_dims(np.array(spectrograms), axis=-1)
     y = np.array(labels)
+    
     #Feature to calculate progress
     X_timing = np.array(seconds/duration)
+
 
     X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -169,3 +171,24 @@ def evaluate_model(model, X_test, y_test):
 
 def predict(model, X_predict):
     return model.predict(X_predict)
+
+if __name__ == "__main__":
+    bq_client = auth_gc_bigquery()
+    print('Auth bigquery')
+
+    table_id = f"{GCP_PROJECT_ID}.Numpy_Arrays_Dataset.processed_train_data_II"
+    print('table ID')
+    output= get_output_query_bigquery(bq_client, table_id, custom="Leo")
+    print('bq output')
+    processed_output = get_bq_processed_data(output)
+    print('process bq output')
+
+    spectrogram_np = np.array(processed_output[0])
+    labels_np = np.array(processed_output[1])
+    print(spectrogram_np.shape)
+    print(labels_np.shape)
+
+    X_train, X_test, y_train, y_test = prep_data_for_model(spectrogram_np, labels_np)
+    print('X and y split')
+    build_trained_model(X_train, X_test, y_train, y_test)
+    print('trained model built')

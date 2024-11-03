@@ -154,12 +154,33 @@ def insert_data_to_bq(rows_to_insert, bq_client, table_id, data_chunks):
         print(f"Encountered errors while inserting rows: {errors}")
 
 
-def get_output_query_bigquery(bq_client, table_id, limit=None, columns="*"):
+def get_output_query_bigquery(bq_client, table_id, custom=None, limit=None, columns="*"):
     """Given a string with columns and an table id, this function returns the result of
     the query with necessary columns. Also, give the option to limit the number of records to output
     """
     try:
-        if limit is None:
+        # Define the query: WE NEED TO CHANGE THIS TO A CUSTOM QUERY AND THE LIMIT TO A CUSTOM LIMIT
+        if custom is not None:
+            query = f"""
+            WITH ads AS (
+            SELECT spectrogram, labels
+            FROM `podcast-ad-skipper.Numpy_Arrays_Dataset.processed_train_data_II`
+            WHERE labels = 1
+            ),
+            no_ads AS (
+                SELECT spectrogram, labels
+                FROM `podcast-ad-skipper.Numpy_Arrays_Dataset.processed_train_data_II`
+                WHERE labels = 0
+                AND MOD(FARM_FINGERPRINT(CAST(spectrogram AS STRING)), 100) < 1  -- Adjust percentage if needed
+                LIMIT 2934
+            )
+
+            SELECT * FROM ads
+            UNION ALL
+            SELECT * FROM no_ads
+
+                    """
+        elif limit is None:
             query = f"""SELECT {columns}
                         from {table_id}"""
         else:
