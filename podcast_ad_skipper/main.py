@@ -73,7 +73,7 @@ def change_name_to_processing_new_ads(podcast_file, model, clip_duration=5):
     return clean_podcast
 
 
-def train_plot_accuracy(X_train, y_train, X_test, y_test):
+def train_plot_accuracy(X_train, X_test, y_train, y_test):
     model = build_baseline_model(
         input_shape=(224,224,3),
         freeze_base=True
