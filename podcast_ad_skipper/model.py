@@ -16,7 +16,9 @@ def prep_data_for_model(all_spectrograms, labels):
     y = np.array(labels)
     #Feature to calculate progress
     # X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
-
+    print(X.shape)
+    print(y.shape)
+    
     X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -54,7 +56,7 @@ def build_baseline_model(input_shape=(128,216,1)):
 
 
 
-def fit_model(model, X_train, y_train, X_test, y_test):
+def fit_model(model, X_train, X_test, y_train, y_test):
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
@@ -68,9 +70,9 @@ def fit_model(model, X_train, y_train, X_test, y_test):
     return model, history
 
 
-def build_trained_model(X_train, y_train, X_test, y_test):
+def build_trained_model(X_train, X_test, y_train, y_test):
     model = build_baseline_model(input_shape=INPUT_SHAPE)
-    latest_trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
+    latest_trained_model, history = fit_model(model, X_train, X_test, y_train, y_test)
     gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{latest_trained_model}"
     # Save the model directly to GCS
 
@@ -145,6 +147,8 @@ if __name__ == "__main__":
     print(labels_np.shape)
 
     X_train, X_test, y_train, y_test = prep_data_for_model(spectrogram_np, labels_np)
+    print(X_train.shape)
+
     print('X and y split')
     build_trained_model(X_train, X_test, y_train, y_test)
     print('trained model built')
