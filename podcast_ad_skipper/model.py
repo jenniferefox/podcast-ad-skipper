@@ -12,14 +12,14 @@ from google.api_core import retry
 
 INPUT_SHAPE = (128, 216, 1)
 
-def prep_data_for_model(all_spectrograms, labels):
+def prep_data_for_model(spectrograms, labels, seconds=None, duration=None):
 
-    X = np.expand_dims(np.array(all_spectrograms), axis=-1)
+    X = np.expand_dims(np.array(spectrograms), axis=-1)
     y = np.array(labels)
+    
     #Feature to calculate progress
+
     # X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
-    print(X.shape)
-    print(y.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -166,6 +166,8 @@ def build_trained_model(X_train, X_test, y_train, y_test):
     return latest_trained_model, history
 
 
+
+
 def download_model_from_gcs(bucket_name, model_name="latest_trained_model.h5"):
     """
     Download a TensorFlow model from Google Cloud Storage.
@@ -173,7 +175,6 @@ def download_model_from_gcs(bucket_name, model_name="latest_trained_model.h5"):
     Args:
         bucket_name: Name of the GCS bucket
         model_name: Name of the model file
-
     Returns:
         model: TensorFlow model or None if download fails
     """
