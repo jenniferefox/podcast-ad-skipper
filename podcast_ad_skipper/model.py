@@ -114,6 +114,7 @@ def save_model_to_gcs(model, bucket_name, model_name="latest_trained_model.h5",
             # Create temporary file path
             temp_model_path = os.path.join(temp_dir, model_name)
 
+            print(f'Saving as: {model_name}')
             # Save model locally first
             model.save(temp_model_path, save_format='h5')
 
@@ -204,7 +205,7 @@ def download_model_from_gcs(bucket_name, model_name="latest_trained_model.h5"):
     except Exception as e:
         return None, f"Error downloading model from GCS: {str(e)}"
 
-    
+
 
 def plot_history(history):
     loss = history.history['loss']
