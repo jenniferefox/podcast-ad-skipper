@@ -16,8 +16,8 @@ def prep_data_for_model(spectrograms, labels, seconds=None, duration=None):
     y = np.array(labels)
     
     #Feature to calculate progress
-    X_timing = np.array(seconds/duration)
 
+    # X_timing = np.array(all_spectrograms[2]/all_spectrograms[3])
 
     X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -35,6 +35,17 @@ def build_baseline_model(input_shape=(128,216,1)):
 
     # Conv2D layer
     tf.keras.layers.Conv2D(32, 3, strides=2, padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+    tf.keras.layers.BatchNormalization(),
 
     # Flatten layer
     tf.keras.layers.Flatten(),
@@ -56,7 +67,7 @@ def build_baseline_model(input_shape=(128,216,1)):
 
 
 
-def fit_model(model, X_train, y_train, X_test, y_test):
+def fit_model(model, X_train, X_test, y_train, y_test):
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
@@ -69,14 +80,55 @@ def fit_model(model, X_train, y_train, X_test, y_test):
     callbacks=[early_stopping,])
     return model, history
 
+def save_model_to_gcs(model, bucket_name, model_name="latest_trained_model.h5"):
+    """
+    Save a TensorFlow model directly to Google Cloud Storage.
 
-def build_trained_model(X_train, y_train, X_test, y_test):
+    Args:
+        model: TensorFlow model to save
+        bucket_name: Name of the GCS bucket
+        model_name: Name of the model file
+
+    Returns:
+        tuple: (bool, str) - (success status, message)
+    """
+    # Initialize GCS client
+    gc_client = auth_gc_storage()
+
+    # Check if bucket exists
+    if not gc_client.bucket(bucket_name):
+        return False, f"Bucket {bucket_name} not found"
+
+    # Get bucket
+    bucket = gc_client.bucket(bucket_name)
+
+    # Create GCS URI for saving
+    gcs_uri = f"gs://{bucket_name}/{model_name}"
+
+    # Attempt to save model directly to GCS
+    save_status = models.save_model(
+        model,
+        gcs_uri,
+        overwrite=True,
+        include_optimizer=True,
+        save_format='h5'
+    )
+
+    # Check save status
+    if save_status is None:  # TensorFlow returns None on successful save
+        print(f"Model saved successfully to {gcs_uri}")
+        return True
+
+    else:
+        print("Failed to save model to GCS")
+        return False
+
+def build_trained_model(X_train, X_test, y_train, y_test):
     model = build_baseline_model(input_shape=INPUT_SHAPE)
-    latest_trained_model, history = fit_model(model, X_train, y_train, X_test, y_test)
-    gcs_uri = f"gs://{BUCKET_NAME_MODEL}/{latest_trained_model}"
-    # Save the model directly to GCS
+    latest_trained_model, history = fit_model(model, X_train, X_test, y_train, y_test)
 
-    models.save_model(latest_trained_model, gcs_uri)
+    save_model_to_gcs(latest_trained_model, BUCKET_NAME_MODEL)
+
     return latest_trained_model, history
 
 
@@ -189,6 +241,8 @@ if __name__ == "__main__":
     print(labels_np.shape)
 
     X_train, X_test, y_train, y_test = prep_data_for_model(spectrogram_np, labels_np)
+    print(X_train.shape)
+
     print('X and y split')
     build_trained_model(X_train, X_test, y_train, y_test)
     print('trained model built')
