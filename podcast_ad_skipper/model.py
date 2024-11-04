@@ -6,7 +6,9 @@ from podcast_ad_skipper.params import *
 from podcast_ad_skipper.google_cloud import *
 import numpy as np
 from sklearn.model_selection import train_test_split
-from data_preparation import get_bq_processed_data
+from podcast_ad_skipper.data_preparation import get_bq_processed_data
+import tempfile
+from google.api_core import retry
 
 INPUT_SHAPE = (128, 216, 1)
 
@@ -80,48 +82,79 @@ def fit_model(model, X_train, X_test, y_train, y_test):
     callbacks=[early_stopping,])
     return model, history
 
-def save_model_to_gcs(model, bucket_name, model_name="latest_trained_model.h5"):
+
+def save_model_to_gcs(model, bucket_name, model_name="latest_trained_model.h5",
+                     timeout=300, num_retries=3):
     """
-    Save a TensorFlow model directly to Google Cloud Storage.
+    Save a TensorFlow model to Google Cloud Storage with retry logic and configurable timeouts.
 
     Args:
         model: TensorFlow model to save
         bucket_name: Name of the GCS bucket
         model_name: Name of the model file
+        timeout: Timeout in seconds for the upload operation (default: 300)
+        num_retries: Number of retry attempts (default: 3)
 
     Returns:
         tuple: (bool, str) - (success status, message)
     """
-    # Initialize GCS client
-    gc_client = auth_gc_storage()
+    try:
+        # Initialize GCS client with increased timeout
+        storage_client = auth_gc_storage()
 
-    # Check if bucket exists
-    if not gc_client.bucket(bucket_name):
-        return False, f"Bucket {bucket_name} not found"
+        # Check if bucket exists
+        if not storage_client.lookup_bucket(bucket_name):
+            return False, f"Bucket {bucket_name} not found"
 
-    # Get bucket
-    bucket = gc_client.bucket(bucket_name)
+        # Get bucket
+        bucket = storage_client.bucket(bucket_name)
 
-    # Create GCS URI for saving
-    gcs_uri = f"gs://{bucket_name}/{model_name}"
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create temporary file path
+            temp_model_path = os.path.join(temp_dir, model_name)
 
-    # Attempt to save model directly to GCS
-    save_status = models.save_model(
-        model,
-        gcs_uri,
-        overwrite=True,
-        include_optimizer=True,
-        save_format='h5'
-    )
+            # Save model locally first
+            model.save(temp_model_path, save_format='h5')
 
-    # Check save status
-    if save_status is None:  # TensorFlow returns None on successful save
-        print(f"Model saved successfully to {gcs_uri}")
-        return True
+            # Configure retry logic
+            retry_config = retry.Retry(
+                initial=1.0,  # Initial delay in seconds
+                maximum=60.0,  # Maximum delay in seconds
+                multiplier=2.0,  # Multiplier for exponential backoff
+                deadline=timeout,  # Total timeout
+                predicate=retry.if_exception_type(
+                    TimeoutError,
+                    ConnectionError,
+                    ConnectionAbortedError
+                )
+            )
 
-    else:
-        print("Failed to save model to GCS")
-        return False
+            # Upload to GCS with retry logic
+            blob = bucket.blob(model_name)
+
+            # Set chunk size to 5MB for smaller models
+            blob.chunk_size = 5 * 1024 * 1024  # 5MB in bytes
+
+            for attempt in range(num_retries):
+                try:
+                    blob.upload_from_filename(
+                        temp_model_path,
+                        timeout=timeout,
+                        retry=retry_config
+                    )
+                    gcs_uri = f"gs://{bucket_name}/{model_name}"
+                    return True, f"Model successfully saved to {gcs_uri}"
+                except Exception as e:
+                    if attempt == num_retries - 1:  # Last attempt
+                        raise
+                    print(f"Attempt {attempt + 1} failed, retrying...")
+                    continue
+
+    except Exception as e:
+        return False, f"Error saving model to GCS: {str(e)}"
+
+
 
 def build_trained_model(X_train, X_test, y_train, y_test):
     model = build_baseline_model(input_shape=INPUT_SHAPE)
@@ -132,18 +165,46 @@ def build_trained_model(X_train, X_test, y_train, y_test):
     return latest_trained_model, history
 
 
-def download_model_from_gcs(gcs_uri):
-    client = auth_gc_storage()
-    blobs = list(client.get_bucket(BUCKET_NAME_MODEL).list_blobs())
+def download_model_from_gcs(bucket_name, model_name="latest_trained_model.h5"):
+    """
+    Download a TensorFlow model from Google Cloud Storage.
 
+    Args:
+        bucket_name: Name of the GCS bucket
+        model_name: Name of the model file
+
+    Returns:
+        model: TensorFlow model or None if download fails
+    """
     try:
-        latest_trained_model = models.load_model(gcs_uri)
-        print("✅ Latest model downloaded from cloud storage")
-        return latest_trained_model
+        # Initialize GCS client
+        storage_client = auth_gc_storage()
 
-    except:
-        print(f"\n❌ No model found in GCS bucket {BUCKET_NAME}")
-        return None
+        # Check if bucket exists
+        if not storage_client.lookup_bucket(bucket_name):
+            return None, f"Bucket {bucket_name} not found"
+
+        # Get bucket
+        bucket = storage_client.bucket(bucket_name)
+
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create temporary file path
+            temp_model_path = os.path.join(temp_dir, model_name)
+
+            # Download file from GCS
+            blob = bucket.blob(model_name)
+            blob.download_to_filename(temp_model_path)
+
+            # Load the model using TensorFlow
+            model = tf.keras.models.load_model(temp_model_path)
+
+            return model, f"Model successfully downloaded from gs://{bucket_name}/{model_name}"
+
+    except Exception as e:
+        return None, f"Error downloading model from GCS: {str(e)}"
+
+    
 
 def plot_history(history):
     loss = history.history['loss']
