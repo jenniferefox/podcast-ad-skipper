@@ -1,7 +1,7 @@
 # Podcast Ad Skipper
 
 ## Overview
-Podcast Ad Skipper is a Python-based project that allows users to download their favourite podcasts, automatically detect advertisements, and remove them. This results in a seamless listening experience where users can enjoy their podcasts without interruptions.
+Podcast Ad Skipper is a Python-based machine learning project that allows users to download their favourite podcasts, automatically detect advertisements, and remove them. This results in a seamless listening experience where users can enjoy their podcasts without interruptions.
 
 ## Features
 - Download your favorite podcasts.
@@ -59,29 +59,21 @@ mkdir /Users/XXX/code/jenniferefox/podcast-ad-remover/raw_data/full_podcast
 ## System Design
 The system is designed to leverage Google Cloud Platform (GCP) for scalable and efficient podcast processing. Below is a diagram illustrating the architecture:
 
-![System Design](path/to/your/drawio/sketch.png)
+flowchart TD
+    Start["Start"] --> Upload["Upload Wav Audio Files to Google Cloud Storage"]
+    Upload --> Convert["Convert to Spectrograms"]
+    Convert --> Store["Store Spectrograms as Numpy arrays in Google BigQuery"]
+    Store --> Train["Input data to train CNN Model"]
+    Train --> End["End"]
 
-*In the diagram:*
-- **GCP Services**: Highlight the specific GCP services used (e.g., Cloud Storage, Compute Engine, etc.).
-- **Data Flow**: Show how data flows through the system, from podcast download to ad detection and removal.
+    style Start fill:#66BB6A,stroke:#4CAF50,color:#FFFFFF
+    style Upload fill:#29B6F6,stroke:#0288D1,color:#FFFFFF
+    style Convert fill:#FFCA28,stroke:#FFB300,color:#FFFFFF
+    style Store fill:#AB47BC,stroke:#8E24AA,color:#FFFFFF
+    style Train fill:#EF5350,stroke:#E53935,color:#FFFFFF
+    style End fill:#66BB6A,stroke:#4CAF50,color:#FFFFFF
 
-
-## Usage
-1. To download a podcast, use the following command:
-   ```
-   python main.py download <podcast_url>   --> just an example!!!
-   ```
-
-2. To process the downloaded podcast and remove ads:
-   ```
-   python main.py process <podcast_file>  --> just an example!!!
-   ```
-
-3. The final podcast will be saved in the output directory.
 
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for more details. --> just an example!!!
-
-## Contact
-For any inquiries, please reach out to [email@gmail.com](mailto:your.email@gmail.com).
+This project is licensed under the MIT License.
