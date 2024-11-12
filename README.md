@@ -17,6 +17,8 @@ Podcast Ad Skipper is a Python-based project that allows users to download their
 
 ### Install ffmpeg
 To install `ffmpeg`, use Homebrew:
+
+
 ```
 brew install ffmpeg
 ```
@@ -57,31 +59,8 @@ mkdir /Users/XXX/code/jenniferefox/podcast-ad-remover/raw_data/full_podcast
 - `full_podcast`: This folder will save the full podcasts. -->
 
 ## System Design
-The system is designed to leverage Google Cloud Platform (GCP) for scalable and efficient podcast processing. Below is a diagram illustrating the architecture:
-
-![System Design](path/to/your/drawio/sketch.png)
-
-*In the diagram:*
-- **GCP Services**: Highlight the specific GCP services used (e.g., Cloud Storage, Compute Engine, etc.).
-- **Data Flow**: Show how data flows through the system, from podcast download to ad detection and removal.
-
-
-## Usage
-1. To download a podcast, use the following command:
-   ```
-   python main.py download <podcast_url>   --> just an example!!!
-   ```
-
-2. To process the downloaded podcast and remove ads:
-   ```
-   python main.py process <podcast_file>  --> just an example!!!
-   ```
-
-3. The final podcast will be saved in the output directory.
-
+The system is designed to leverage Google Cloud Platform (GCP) for scalable and efficient podcast processing.
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details. --> just an example!!!
 
-## Contact
-For any inquiries, please reach out to [email@gmail.com](mailto:your.email@gmail.com).
